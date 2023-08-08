@@ -1,49 +1,6 @@
 import re
 
 
-def standardize_metals_name(df, subset=None, replace=False, return_newnames=False):
-    """
-    Renames columns based on Xx_[pct|ppm] convention.
-
-    Parameters
-    ----------
-    df : pandas dataframe
-
-    subset : list-like, default None
-        List of column names to subset and apply renaming to.
-
-    replace : bool, default False
-        Whether to replace the names within the function or return the names
-        as a list.
-
-    return_newnames : bool, default True
-        If replace==True, also return names list.
-
-    Returns
-    -----
-    [df] [cols_new]
-        Either dataframe with renamed columns, list of new column names,
-        or both.
-    """
-
-    if subset is not None:
-        cols_rename = df[subset].columns
-    else:
-        cols_rename = df.columns
-    cols_new = cols_rename.str.replace(" (", "_", regex=False)
-    cols_new = cols_new.str.replace(")", "", regex=False)
-    cols_new = cols_new.str.replace("%", "pct", regex=False)
-    cols_new = cols_new.str.replace("gpt", "ppm", regex=False)
-
-    if replace:
-        if return_newnames:
-            return df.rename(columns=dict(zip(cols_rename, cols_new))).copy(), cols_new
-        else:
-            return df.rename(columns=dict(zip(cols_rename, cols_new))).copy()
-    else:
-        return cols_new
-
-
 def regex_pad_sample_name(srs):
     """
     Pads sample names to hundreds place.
@@ -60,7 +17,6 @@ def regex_pad_sample_name(srs):
     return srs
 
 
-# ANNOTATE
 def drop_missing(
     df, subset=None, cutoff=0.5, consider_ND=False, ND_raw=False, return_details=True
 ):
@@ -111,49 +67,7 @@ def drop_missing(
         return df.drop(columns=todrop).copy()
 
 
-# ANNOTATE
-def make_numeric(df, subset=None, as_neg=True):
-    """
-    Identifies numeric strings preceeded by < or > and turns them into numeric
-    type.
-
-    Parameters
-    ----------
-    df : pandas dataframe
-
-    subset : list-like, default None
-        Subset of columns to apply numeric to.
-
-    as_neg : bool, default True
-        Whether to convert observations with < or > to negative
-        values.
-
-    Returns
-    -----
-    None
-        Changes the data in place.
-    """
-    if subset is not None:
-        for col in df[subset].select_dtypes("O"):
-            try:
-                if as_neg:
-                    df[col] = df[col].str.replace(r"<|>", "-", regex=True).apply(float)
-                else:
-                    df[col] = df[col].str.replace(r"<|>", "", regex=True).apply(float)
-            except:
-                print(f"{col} not numeric")
-    else:
-        for col in df.select_dtypes("O"):
-            try:
-                if as_neg:
-                    df[col] = df[col].str.replace(r"<|>", "-", regex=True).apply(float)
-                else:
-                    df[col] = df[col].str.replace(r"<|>", "", regex=True).apply(float)
-            except:
-                print(f"{col} not numeric")
-
-
-def check_double_metals(subset, df=None, remove="pct", keep="ppm", splt="_", drop=True):
+def check_double_metals(subset, df, remove="pct", keep="ppm", splt="_", drop=True):
     """
     Determines if any metals are repeated.
 
@@ -163,7 +77,7 @@ def check_double_metals(subset, df=None, remove="pct", keep="ppm", splt="_", dro
     subset : list-like
         Subset of columns to apply numeric to.
 
-    df : pandas dataframe, default None
+    df : pandas dataframe
 
     remove : str, default 'pct'
         Suffix type to remove.
