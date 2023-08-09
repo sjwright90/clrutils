@@ -233,13 +233,14 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
         df.rename(columns=new_names, inplace=True)
 
 
+# %%
 def isolate_metals_match_dfs(
     env_df,
     exp_df,
     env_st="al_ppm",
     env_en="zr_ppm",
-    exp_st="AU_GPT",
-    exp_en="ZN_PPM",
+    exp_st="al_ppm",
+    exp_en="zr_ppm",
     dfs_isolated=False,
 ):
     """
@@ -278,19 +279,24 @@ def isolate_metals_match_dfs(
         env_temp = env_df.copy()
         exp_temp = exp_df.copy()
 
-    # rename metals to match b/t datasets
-    env_met_incl = [a.split("_")[0].lower() for a in env_temp]
-    exp_met_incl = [a.split("_")[0].lower() for a in exp_temp]
+    # get the names
+    env_prefix = env_temp.columns.str.split("_").str[0].str.lower()
+    exp_prefix = exp_temp.columns.str.split("_").str[0].str.lower()
 
-    # find matching columns
-    in_both = list(set(env_met_incl) & set(exp_met_incl))
+    inboth = list(set(env_prefix) & set(exp_prefix))
 
-    # rename df columns
-    env_temp.columns = env_met_incl
-    exp_temp.columns = exp_met_incl
+    # find matching names
+    # both ways for possible mismatch on suffix
+    env_met_incl = [a for a in env_temp.columns if a.split("_")[0].lower() in inboth]
+    exp_met_incl = [a for a in exp_temp.columns if a.split("_")[0].lower() in inboth]
 
     # extract only columns that are present in both
-    env_temp_met = env_temp[in_both].copy()
-    exp_temp_met = exp_temp[in_both].copy()
+    env_temp_met = env_temp[env_met_incl].copy()
+    env_temp_met = env_temp_met.reindex(sorted(env_temp_met.columns), axis=1)
+    exp_temp_met = exp_temp[exp_met_incl].copy()
+    exp_temp_met = exp_temp_met.reindex(sorted(exp_temp_met.columns), axis=1)
 
     return env_temp_met, exp_temp_met
+
+
+# %%
