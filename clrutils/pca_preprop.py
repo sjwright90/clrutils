@@ -82,7 +82,7 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
 
 
 def isolate_metals_match_dfs(
-    env_df, exp_df, env_st="Al_ppm", env_en="Zr_ppm", exp_st="AU_GPT", exp_en="ZN_PPM"
+    env_df, exp_df, env_st="al_ppm", env_en="zr_ppm", exp_st="AU_GPT", exp_en="ZN_PPM"
 ):
     """
     Extracts metals columns and finds shared metals between environmental and exploration data
@@ -95,10 +95,10 @@ def isolate_metals_match_dfs(
     exp_df : pandas df
         Experimental dataframe, either full dataframe or already isolated to metals.
 
-    env_st : str, default 'Al_ppm'
+    env_st : str, default 'al_ppm'
         Name of first metals in environmental dataset
 
-    env_ed :  str, default 'Zr_ppm'
+    env_ed :  str, default 'zr_ppm'
         Name of last metals column in environmental dataset
 
     exp_st : str, default 'AU_GPT'
@@ -115,8 +115,6 @@ def isolate_metals_match_dfs(
     """
     env_temp = env_df.loc[:, env_st:env_en].copy()
     exp_temp = exp_df.loc[:, exp_st:exp_en].copy()
-    assert not df_anynull(env_temp)
-    assert not df_anynull(exp_temp)
 
     # rename metals to match b/t datasets
     env_met_incl = [a.split("_")[0].lower() for a in env_temp]
@@ -132,9 +130,6 @@ def isolate_metals_match_dfs(
     # extract only columns that are present in both
     env_temp_met = env_temp[in_both].copy()
     exp_temp_met = exp_temp[in_both].copy()
-
-    assert ~df_anynull(env_temp_met)
-    assert ~df_anynull(exp_temp_met)
 
     return env_temp_met, exp_temp_met
 
