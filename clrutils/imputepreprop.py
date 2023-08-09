@@ -67,7 +67,10 @@ def drop_missing(
         return df.drop(columns=todrop).copy()
 
 
-def check_double_metals(subset, df, remove="pct", keep="ppm", splt="_", drop=True):
+# %%
+def check_double_metals(
+    subset, df, remove="pct", keep="ppm", splt="_", drop=True, remove_mostna=True
+):
     """
     Determines if any metals are repeated.
 
@@ -75,12 +78,15 @@ def check_double_metals(subset, df, remove="pct", keep="ppm", splt="_", drop=Tru
     ----------
 
     subset : list-like
-        Subset of columns to apply numeric to.
+        Subset of columns to determine duplicates.
 
     df : pandas dataframe
 
     remove : str, default 'pct'
         Suffix type to remove.
+
+    keep : str, default 'ppm'
+        Suffix type to keep.
 
     splt : str, default '_'
         Substring to split the column name by.
@@ -97,14 +103,35 @@ def check_double_metals(subset, df, remove="pct", keep="ppm", splt="_", drop=Tru
         a.split(splt)[0] for a in subset if a.split(splt)[1].lower() in [remove, keep]
     ]
     strts = {a for a in strts if strts.count(a) > 1}
-    to_rem = [a.lower() + splt + remove for a in strts]
+
+    if remove_mostna:
+        to_rem = []
+        for s in strts:
+            to_rem.append(
+                df[casematch([s + splt + remove, s + splt + keep], df.columns)]
+                .isna()
+                .sum()
+                .idxmax()
+            )
+
+    else:
+        to_rem = casematch([a.lower() + splt + remove for a in strts], df.columns)
 
     if drop:
-        casematch = [a for a in df.columns if a.lower() in to_rem]
-        df.drop(columns=casematch, inplace=True)
-        print(f"Dropping: {casematch}")
+        df.drop(columns=to_rem, inplace=True)
+        print(f"Dropping: {to_rem}")
     else:
         return to_rem
+
+
+# %%
+def casematch(val, cols):
+    if isinstance(val, str):
+        val = [val]
+    return [a for a in cols for v in val if a.lower() == v.lower()]
+
+
+# %%
 
 
 def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
