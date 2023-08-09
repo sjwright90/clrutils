@@ -40,7 +40,8 @@ def id_unmarked_nd(df, subset=None, inplace=False, cutoff=0.2, method="neg"):
     temp = df[subset].copy()
     nd_col = {}
     for col in temp.select_dtypes(exclude="O"):
-        vcount = temp[col].value_counts(normalize=True).sort_index()
+        # only count positive values as negatives would already be identified as ND
+        vcount = temp[temp[col] >= 0][col].value_counts(normalize=True).sort_index()
         if vcount.iloc[-1] > cutoff:
             nd_col[col] = [vcount.index[-1]]
         if vcount.iloc[0] > cutoff:
