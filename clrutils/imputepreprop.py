@@ -1,4 +1,5 @@
 import re
+from numpy import nan
 
 
 def regex_pad_sample_name(srs):
@@ -15,6 +16,45 @@ def regex_pad_sample_name(srs):
     srs = re.sub(r"(?<=\()(?=\d{1}[\.|-])", "00", srs)
     srs = re.sub(r"(?<=\()(?=\d{2}[\.|-])", "0", srs)
     return srs
+
+
+def id_unmarked_nd(df, subset=None, inplace=False, cutoff=0.2, method="neg"):
+    """Identifies non-detects based on maximum or minimun value in a column
+       being above a certain threshold of the value counts of the columns.
+    Parameters
+    ----------
+    df : pandas dataframe
+    subset : list-like, default None
+        Subset of columns to apply drop to.
+    inplace : bool, default False
+        Whether to convert values inplace.
+    cutoff :  int (0-1), default 0.2
+        Cutoff percentage of maximum or minimum value, higher value is more stringent.
+    method : one of 'neg','nan','half', default "neg"
+        How to convert if 'inplace' True. 'neg' converts to negative, 'nan' converts
+        to NaN, 'half' converts to half the value.
+    """
+    convertdict = {"neg": -1, "nan": nan, "half": 0.5}
+    if subset is None:
+        subset = df.columns
+    temp = df[subset].copy()
+    nd_col = {}
+    for col in temp.select_dtypes(exclude="O"):
+        vcount = temp[col].value_counts(normalize=True).sort_index()
+        if vcount.iloc[-1] > cutoff:
+            nd_col[col] = [vcount.index[-1]]
+        if vcount.iloc[0] > cutoff:
+            nd_col[col] = nd_col.setdefault(col, []) + [vcount.index[0]]
+    if inplace:
+        if method == "half":
+            print("Only convert the lower bound to half")
+            for col, nd in nd_col.items():
+                nd_col[col] = [min(nd)]
+        print(f"Converting following to {method}: ", nd_col)
+        for col, nd in nd_col.items():
+            for n in nd:
+                df[col] = df[col].replace(n, convertdict[method] * n)
+    return nd_col
 
 
 def drop_missing(
@@ -126,6 +166,22 @@ def check_double_metals(
 
 # %%
 def casematch(val, cols):
+    """
+    Matches strings in a list to a list of strings, ignoring case.
+
+    Parameters
+    ----------
+    val : list-like
+        List of strings to match.
+
+    cols : list-like
+        List of strings to match to.
+
+    Returns
+    -----
+    list
+        List of strings that match.
+    """
     if isinstance(val, str):
         val = [val]
     return [a for a in cols for v in val if a.lower() == v.lower()]
