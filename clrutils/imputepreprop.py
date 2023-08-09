@@ -234,7 +234,13 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
 
 
 def isolate_metals_match_dfs(
-    env_df, exp_df, env_st="al_ppm", env_en="zr_ppm", exp_st="AU_GPT", exp_en="ZN_PPM"
+    env_df,
+    exp_df,
+    env_st="al_ppm",
+    env_en="zr_ppm",
+    exp_st="AU_GPT",
+    exp_en="ZN_PPM",
+    dfs_isolated=False,
 ):
     """
     Extracts metals columns and finds shared metals between environmental and exploration data
@@ -265,8 +271,12 @@ def isolate_metals_match_dfs(
         Pandas dataframes of environmental and exploration
         subset by metals found in both.
     """
-    env_temp = env_df.loc[:, env_st:env_en].copy()
-    exp_temp = exp_df.loc[:, exp_st:exp_en].copy()
+    if not dfs_isolated:
+        env_temp = env_df.loc[:, env_st:env_en].copy()
+        exp_temp = exp_df.loc[:, exp_st:exp_en].copy()
+    else:
+        env_temp = env_df.copy()
+        exp_temp = exp_df.copy()
 
     # rename metals to match b/t datasets
     env_met_incl = [a.split("_")[0].lower() for a in env_temp]
