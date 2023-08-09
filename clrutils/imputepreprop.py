@@ -174,3 +174,56 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
 
     if rename:
         df.rename(columns=new_names, inplace=True)
+
+
+def isolate_metals_match_dfs(
+    env_df, exp_df, env_st="al_ppm", env_en="zr_ppm", exp_st="AU_GPT", exp_en="ZN_PPM"
+):
+    """
+    Extracts metals columns and finds shared metals between environmental and exploration data
+
+    Parameters
+    ----------
+    env_df : pandas df
+        Environmental dataframe, either full dataframe or already isolated to metals.
+
+    exp_df : pandas df
+        Experimental dataframe, either full dataframe or already isolated to metals.
+
+    env_st : str, default 'al_ppm'
+        Name of first metals in environmental dataset
+
+    env_ed :  str, default 'zr_ppm'
+        Name of last metals column in environmental dataset
+
+    exp_st : str, default 'AU_GPT'
+        Name of first metals in exploration dataset
+
+    exp_en : str, default 'ZN_PPM'
+        Name of last metals column in exploration dataset
+
+    Returns
+    -----
+    env_temp_met, exp_temp_met
+        Pandas dataframes of environmental and exploration
+        subset by metals found in both.
+    """
+    env_temp = env_df.loc[:, env_st:env_en].copy()
+    exp_temp = exp_df.loc[:, exp_st:exp_en].copy()
+
+    # rename metals to match b/t datasets
+    env_met_incl = [a.split("_")[0].lower() for a in env_temp]
+    exp_met_incl = [a.split("_")[0].lower() for a in exp_temp]
+
+    # find matching columns
+    in_both = list(set(env_met_incl) & set(exp_met_incl))
+
+    # rename df columns
+    env_temp.columns = env_met_incl
+    exp_temp.columns = exp_met_incl
+
+    # extract only columns that are present in both
+    env_temp_met = env_temp[in_both].copy()
+    exp_temp_met = exp_temp[in_both].copy()
+
+    return env_temp_met, exp_temp_met
