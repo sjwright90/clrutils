@@ -18,7 +18,9 @@ def regex_pad_sample_name(srs):
     return srs
 
 
-def id_unmarked_nd(df, subset=None, inplace=False, cutoff=0.2, method="neg"):
+def id_unmarked_nd(
+    df, subset=None, inplace=False, lowerbound=0.2, upperbound=0.5, method="neg"
+):
     """Identifies non-detects based on maximum or minimun value in a column
        being above a certain threshold of the value counts of the columns.
     Parameters
@@ -28,8 +30,11 @@ def id_unmarked_nd(df, subset=None, inplace=False, cutoff=0.2, method="neg"):
         Subset of columns to apply drop to.
     inplace : bool, default False
         Whether to convert values inplace.
-    cutoff :  int (0-1), default 0.2
-        Cutoff percentage of maximum or minimum value, higher value is more stringent.
+    lowerbound :  int (0-1), default 0.2
+        Proportional cutoff for maximum or minimum value in the column.
+    upperbound :  int (0-1), default 0.5
+        Proportional cutoff of value count for any value, i.e. any value with
+        value count proportion > upperbound will be flagged.
     method : one of 'neg','nan','half', default "neg"
         How to convert if 'inplace' True. 'neg' converts to negative, 'nan' converts
         to NaN, 'half' converts to half the value.
@@ -42,10 +47,12 @@ def id_unmarked_nd(df, subset=None, inplace=False, cutoff=0.2, method="neg"):
     for col in temp.select_dtypes(exclude="O"):
         # only count positive values as negatives would already be identified as ND
         vcount = temp[temp[col] >= 0][col].value_counts(normalize=True).sort_index()
-        if vcount.iloc[-1] > cutoff:
+        if vcount.iloc[-1] > lowerbound:
             nd_col[col] = [vcount.index[-1]]
-        if vcount.iloc[0] > cutoff:
+        if vcount.iloc[0] > lowerbound:
             nd_col[col] = nd_col.setdefault(col, []) + [vcount.index[0]]
+        if vcount.max() > upperbound:
+            nd_col[col] = nd_col.setdefault(col, []) + [vcount.idxmax()]
     if inplace:
         if method == "half":
             print("Only convert the lower bound to half")
