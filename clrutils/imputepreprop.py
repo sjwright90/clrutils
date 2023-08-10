@@ -53,6 +53,8 @@ def id_unmarked_nd(
             nd_col[col] = nd_col.setdefault(col, []) + [vcount.index[0]]
         if vcount.max() > upperbound:
             nd_col[col] = nd_col.setdefault(col, []) + [vcount.idxmax()]
+    for k, v in nd_col.items():
+        nd_col[k] = list(set(v))
     if inplace:
         if method == "half":
             print("Only convert the lower bound to half")
