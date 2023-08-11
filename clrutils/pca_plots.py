@@ -133,8 +133,8 @@ def pca_plot(
     pca1="PC1",
     pca2="PC2",
     metals="metals",
-    lith="Lithology",
-    npr_size="NPR",
+    lith="lithology_relog",
+    npr_size="npr_size",
     cmapin=cm.turbo,  # type: ignore
     pca1a="PC1",
     pca2a="PC2",
