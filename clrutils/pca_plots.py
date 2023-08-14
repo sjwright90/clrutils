@@ -147,7 +147,7 @@ def pca_plot(
     plot_npr=True,
     edgecolor=True,
     loading_lines=True,
-    tpbbx=0.965,
+    tpbbx=0.985,
     tpbby=1.05,
     mkrin="o",
     btbbx=0.985,
