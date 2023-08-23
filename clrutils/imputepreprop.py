@@ -1,5 +1,8 @@
+# %%
 import re
 from numpy import nan
+
+# %%
 
 
 def regex_pad_sample_name(srs):
@@ -18,6 +21,7 @@ def regex_pad_sample_name(srs):
     return srs
 
 
+# %%
 def id_unmarked_nd(
     df, subset=None, inplace=False, lowerbound=0.2, upperbound=0.5, method="neg"
 ):
@@ -56,10 +60,21 @@ def id_unmarked_nd(
     for k, v in nd_col.items():
         nd_col[k] = list(set(v))
     if inplace:
+        # THIS ALGORITHM NEEDS LOOKING AT AND IMPROVING
         if method == "half":
-            print("Only convert the lower bound to half")
+            print(
+                "Warning, attempts to identify only lowerbound values to half, but it is advised to double check the work."
+            )
             for col, nd in nd_col.items():
-                nd_col[col] = [min(nd)]
+                if len(nd) > 1:
+                    nd_col[col] = [min(nd)]
+                elif nd[0] == temp[col].min():
+                    nd_col[col] = [nd[0]]
+                elif nd[0] < temp[col].quantile(0.25):
+                    nd_col[col] = [nd[0]]
+                else:
+                    nd_col[col] = []
+            nd_col = {k: v for k, v in nd_col.items() if len(v) > 0}
         print(f"Converting following to {method}: ", nd_col)
         for col, nd in nd_col.items():
             for n in nd:
@@ -67,6 +82,7 @@ def id_unmarked_nd(
     return nd_col
 
 
+# %%
 def drop_missing(
     df, subset=None, cutoff=0.5, consider_ND=False, ND_raw=False, return_details=True
 ):
