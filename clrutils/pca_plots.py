@@ -399,6 +399,10 @@ def pca_plot(
     axt.get_legend().set_title(topledgettl, prop={"size": 15})  # type: ignore
     # set plot title
     axt.set_title(title, size=20)
+
+    # SEE IF THIS WORKS, IF NOT DELETE
+    axt.legend().get_title().set_multialignment("center")
+
     # set x-axis label
     axt.set_xlabel(
         f"Principal component {x_axispca} ({round(pca_obj[x_axispca-1]*100,2)}%)",
