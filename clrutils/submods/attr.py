@@ -62,3 +62,30 @@ lith_name_map = {
     "QTVN": "P1",
     "VCGL": "CGL",
 }
+intrusions = Lith_order[:12]
+k_intrusions = Lith_order[:5]
+p_intrusions = Lith_order[5:12]
+breccias = Lith_order[12:16]
+wallrock = Lith_order[16:28]
+other = Lith_order[-12:-1]
+unid = ["UNCL", "UNID", "IU", "No Data"]
+
+compiled_liths = [
+    intrusions,
+    k_intrusions,
+    p_intrusions,
+    breccias,
+    wallrock,
+    other,
+    unid,
+]
+t_fill = [
+    "Intrusions",
+    "K-intrustions",
+    "P-intrustions",
+    "Breccias",
+    "Wallrock",
+    "Other",
+    "Unidentified",
+]
+titles = [f"Sulphurets PCA bi-plot: {a}" for a in t_fill]
