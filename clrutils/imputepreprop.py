@@ -291,6 +291,9 @@ def isolate_metals_match_dfs(
     exp_en : str, default 'ZN_PPM'
         Name of last metals column in exploration dataset
 
+    dfs_isolated : bool, default False
+        Whether the dataframes are already isolated to metals. If True, env_st, env_en, exp_st, exp_en are ignored.
+
     Returns
     -----
     env_temp_met, exp_temp_met
