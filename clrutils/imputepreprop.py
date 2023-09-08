@@ -23,7 +23,13 @@ def regex_pad_sample_name(srs):
 
 # %%
 def id_unmarked_nd(
-    df, subset=None, inplace=False, lowerbound=0.2, upperbound=0.5, method="neg"
+    df,
+    subset=None,
+    inplace=False,
+    lowerbound=0.2,
+    upperbound=0.5,
+    method="neg",
+    checkall=False,
 ):
     """Identifies non-detects based on maximum or minimun value in a column
        being above a certain threshold of the value counts of the columns.
@@ -42,6 +48,14 @@ def id_unmarked_nd(
     method : one of 'neg','nan','half', default "neg"
         How to convert if 'inplace' True. 'neg' converts to negative, 'nan' converts
         to NaN, 'half' converts to half the value.
+    checkall : bool, default False
+        Whether to check all values in the column, or just the maximum and minimum.
+        Tests all values against the upperbound.
+    Returns
+    -----
+    dict
+        Dictionary of columns and values to convert.
+        Changes the data in place if inplace=True.
     """
     convertdict = {"neg": -1, "nan": nan, "half": 0.5}
     if subset is None:
@@ -60,6 +74,10 @@ def id_unmarked_nd(
             nd_col[col] = nd_col.setdefault(col, []) + [vcount.index[0]]
         if vcount.max() > upperbound:
             nd_col[col] = nd_col.setdefault(col, []) + [vcount.idxmax()]
+        if checkall:
+            nd_col[col] = nd_col.setdefault(col, []) + [
+                a for a in vcount.index if vcount[a] > upperbound
+            ]
     for k, v in nd_col.items():
         nd_col[k] = list(set(v))
     if inplace:
