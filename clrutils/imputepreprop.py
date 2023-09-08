@@ -51,6 +51,9 @@ def id_unmarked_nd(
     for col in temp.select_dtypes(exclude="O"):
         # only count positive values as negatives would already be identified as ND
         vcount = temp[temp[col] >= 0][col].value_counts(normalize=True).sort_index()
+        # bypass if no values
+        if len(vcount) == 0:
+            continue
         if vcount.iloc[-1] > lowerbound:
             nd_col[col] = [vcount.index[-1]]
         if vcount.iloc[0] > lowerbound:
