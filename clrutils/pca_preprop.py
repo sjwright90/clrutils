@@ -62,18 +62,19 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
         temp = df.copy()
     temp_clr = CLR(temp.values)
 
-    if not scale:  # if not scaling, return CLR only
-        return DataFrame(temp_clr, columns=temp.columns)
-    try:
-        temp_sc = DataFrame(
-            StandardScaler().fit_transform(temp_clr), columns=temp.columns
-        )
-    except Exception as e:
-        print(
-            "0s in the dataframe cause CLR to kick out -np.inf which breaks StandardScaler\nTry removing 0s from original df\n"
-        )
-        print(e)
-        raise
+    if scale:
+        try:
+            temp_sc = DataFrame(
+                StandardScaler().fit_transform(temp_clr), columns=temp.columns
+            )
+        except Exception as e:
+            print(
+                "0s in the dataframe cause CLR to kick out -np.inf which breaks StandardScaler\nTry removing 0s from original df\n"
+            )
+            print(e)
+            raise
+    else:
+        temp_sc = DataFrame(temp_clr, columns=temp.columns)
     if subset_start is not None:
         temp_full = df.drop(columns=temp_sc.columns).copy().join(temp_sc)
         return temp_sc, temp_full
