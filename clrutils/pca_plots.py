@@ -157,6 +157,7 @@ def pca_plot(
     btmldglbls=["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"],
     bold=False,
     thrdbby=0.1,
+    thrdbbx=0.985,
     **kwargs,
 ):
     """
@@ -195,11 +196,10 @@ def pca_plot(
     lith : str, default 'Lithology'
         Name of column in 'df' with the lithologies.
 
-    npr_size : str, default 'NPR', optional
+    npr_size : str or int or list like len df, default 'NPR', optional
         Name of column in df with NPR size categories,
         the values in this column will correspond directly to the size of
         the plotted points, column needs to be numerical.
-        If plot_npr=False this variable is ignored.
 
     cmapin = matplotlib colormap object, default cm.turbo
         Colormap to be used for coloring the points by lithology.
@@ -234,7 +234,7 @@ def pca_plot(
         Must be less than len(pca_obj).
 
     plot_npr : bool, default True
-        Whether to plot NPR sizes
+        Whether to include NPR size legend
 
     edgecolor : bool, default True
         Use edgecolor on markers in plot, if True edgecolor='k'.
@@ -266,6 +266,9 @@ def pca_plot(
 
     thrdbby : float
         y of bounding box to anchor for third legend
+
+    thrdbbx : float
+        x of bounding box to anchor for third legend
 
     **kwargs : dict
         keywords, pretty much reserved for style and markers to pass to sns,
@@ -412,7 +415,7 @@ def pca_plot(
         # construct second legend, pad to avoid cutting off legend 1
         third_legend = plt.legend(
             handles=leg_3_handles,
-            bbox_to_anchor=(btbbx, thrdbby),
+            bbox_to_anchor=(thrdbbx, thrdbby),
             loc="lower left",
             frameon=False,
         )
