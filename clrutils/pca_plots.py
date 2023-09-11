@@ -328,9 +328,12 @@ def pca_plot(
         edg = "k"
     else:
         edg = None
+    if isinstance(npr_size, str):
+        npr_size = temp[npr_size]
+
     params = {
         "alpha": alpha_sct,
-        "s": temp[npr_size],
+        "s": npr_size,
         "edgecolor": edg,
         "c": temp["color"],
         "facecolors": "none",
