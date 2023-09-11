@@ -274,6 +274,8 @@ def pca_plot(
         keywords, pretty much reserved for style and markers to pass to sns,
         stye is the column in df to use for style, markers is the list of
         markers to use for each style. will likely end up with a shitty legend so have fun with that.
+        Also have to pass "style_order" to get the legend to work, this is the order of the styles,
+        take it from the column you are using for style, but can be any order you want
 
     Returns
     -----
@@ -395,7 +397,7 @@ def pca_plot(
         axt.add_artist(first_legend)
     else:
         pass
-    if "style" and "markers" in params.keys():
+    if "style" and "markers" and "style_order" in params.keys():
         print("making 3rd legend")
         # build second legend
         # markers of color associated with
@@ -410,7 +412,7 @@ def pca_plot(
                 label=a,
                 markerfacecolor="black",
             )
-            for a, b in zip(temp[params["style"]].unique(), params["markers"])
+            for a, b in zip(params["style_order"], params["markers"])
         ]
         # construct second legend, pad to avoid cutting off legend 1
         third_legend = plt.legend(
