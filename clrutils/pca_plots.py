@@ -161,7 +161,8 @@ def pca_plot(
     **kwargs,
 ):
     """
-    Makes PCA bi-plot with metals loading
+    Makes PCA bi-plot with metals loading, this is a rebuild using
+    seaborn instead of matplotlib, experimental version
 
     Parameters
     ----------
