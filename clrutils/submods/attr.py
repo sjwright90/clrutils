@@ -1,4 +1,10 @@
 # lithological order
+from pathlib import Path
+
+ksm_py_path_str = (
+    Path().home()
+    / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/03 Technical Work/00 Python_R"
+)
 Lith_order = [
     "K1",  # intrusions
     "K2",
