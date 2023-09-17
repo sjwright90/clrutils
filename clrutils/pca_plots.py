@@ -7,6 +7,7 @@ from pandas import Categorical, DataFrame
 from sklearn.decomposition import PCA
 from clrutils import Lith_order
 import seaborn as sns
+import warnings
 
 # %%
 
@@ -628,9 +629,15 @@ def pca_plot_old(
         figt, axt = plt.subplots(figsize=(10, 10))
 
     # get color range
-    colors = np.linspace(0, 1, len(df[lith].unique()))
+    unique_lith_in = df[lith].unique()
+    
+    colors = np.linspace(0, 1, len(unique_lith_in))
 
-    lith_present = [l for l in lith_order_in if l in df[lith].unique()]
+    lith_present = [l for l in lith_order_in if l in unique_lith_in]
+
+    if sorted(unique_lith_in) != sorted(lith_order_in):
+        warnings.warn("Lithologies in sample not present in chosen lith order, appending to end")
+        lith_present = lith_present + [l for l in unique_lith_in if l not in lith_present]
 
     # make copy of df to avoid altering original
     temp = df.copy()
