@@ -274,10 +274,17 @@ def pca_plot(
 
     **kwargs : dict
         keywords, pretty much reserved for style and markers to pass to sns,
-        stye is the column in df to use for style, markers is the list of
+        style is the column in df to use for style, markers is the list of
         markers to use for each style. will likely end up with a shitty legend so have fun with that.
         Also have to pass "style_order" to get the legend to work, this is the order of the styles,
-        take it from the column you are using for style, but can be any order you want
+        take it from the column you are using for style, but can be any order you want.
+        -note: damn it Sam, what the F does this mean?
+        an example would look like this:
+            params = {
+                "style": "deposit",
+                "markers": ["P", "*"],
+                "style_order": sorted(plot_df["deposit"].unique(), reverse=True),
+            }
 
     Returns
     -----
@@ -630,14 +637,18 @@ def pca_plot_old(
 
     # get color range
     unique_lith_in = df[lith].unique()
-    
+
     colors = np.linspace(0, 1, len(unique_lith_in))
 
     lith_present = [l for l in lith_order_in if l in unique_lith_in]
 
     if sorted(unique_lith_in) != sorted(lith_order_in):
-        warnings.warn("Lithologies in sample not present in chosen lith order, appending to end")
-        lith_present = lith_present + [l for l in unique_lith_in if l not in lith_present]
+        warnings.warn(
+            "Lithologies in sample not present in chosen lith order, appending to end"
+        )
+        lith_present = lith_present + [
+            l for l in unique_lith_in if l not in lith_present
+        ]
 
     # make copy of df to avoid altering original
     temp = df.copy()
