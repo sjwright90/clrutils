@@ -53,6 +53,8 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
         Dataframe of CLR and scaled values. If 'subset_start' specified, copy
         of the orginal dataframe is returned with treated columns replaced.
     """
+    temp_idx = df.index.copy()  # save index for later
+
     if subset_start is not None:
         if subset_end is not None:
             temp = df.loc[:, subset_start:subset_end].copy()
@@ -60,6 +62,9 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
             temp = df.loc[:, subset_start:].copy()
     else:
         temp = df.copy()
+    if df_anynull(temp):
+        print("Null values in dataframe, CLR will not work\n")
+        raise ValueError
     temp_clr = CLR(temp.values)
 
     if scale:
@@ -75,8 +80,11 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
             raise
     else:
         temp_sc = DataFrame(temp_clr, columns=temp.columns)
+    temp_sc.index = temp_idx  # restore index
     if subset_start is not None:
-        assert df.index.equals(temp_sc.index)
+        assert df.index.equals(
+            temp_sc.index
+        ), "Index of original dataframe and CLR dataframe do not match"
         temp_full = df.drop(columns=temp_sc.columns).copy().join(temp_sc)
         return temp_sc, temp_full
     else:
