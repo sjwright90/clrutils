@@ -109,7 +109,7 @@ def pc_scaler(series):
 
 
 def make_df_for_biplot(
-    trnf_data, full_df, col_list=["lith", "lab"], num_comp=2, scale=True
+    trnf_data, full_df, col_list=["lith", "lab"], num_comp=2, scale=True, prefix="PC"
 ):
     """
     Extract PCs and relevant columns for bi-plots
@@ -141,7 +141,7 @@ def make_df_for_biplot(
         Dataframe. Components have a min-max scaler applied to them.
     """
 
-    colnames = [f"PC{x+1}" for x in range(num_comp)]
+    colnames = [f"{prefix}{x+1}" for x in range(num_comp)]
     temp = DataFrame(zip(*trnf_data[:, 0:num_comp].T)).join(full_df[col_list])
     temp.columns = colnames + col_list
 
