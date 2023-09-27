@@ -159,6 +159,7 @@ def pca_plot(
     bold=False,
     thrdbby=0.1,
     thrdbbx=0.985,
+    l3_title="Deposit",
     **kwargs,
 ):
     """
@@ -266,11 +267,17 @@ def pca_plot(
     btmldglbls : list-like strings
         Labels for bottom legend
 
+    bold : bool, default False
+        Whether to bold the metal labels on the loading lines
+
     thrdbby : float
         y of bounding box to anchor for third legend
 
     thrdbbx : float
         x of bounding box to anchor for third legend
+
+    l3_title : str
+        Title for third legend, if using
 
     **kwargs : dict
         keywords, pretty much reserved for style and markers to pass to sns,
@@ -284,6 +291,7 @@ def pca_plot(
                 "style": "deposit",
                 "markers": ["P", "*"],
                 "style_order": sorted(plot_df["deposit"].unique(), reverse=True),
+                "style_title": "Deposit",
             }
 
     Returns
@@ -430,7 +438,7 @@ def pca_plot(
             loc="lower left",
             frameon=False,
         )
-        third_legend.set_title("Deposit", prop={"size": 15})  # type: ignore
+        third_legend.set_title(l3_title, prop={"size": 15})  # type: ignore
 
         axt.add_artist(third_legend)
 
