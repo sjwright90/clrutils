@@ -155,7 +155,7 @@ def pca_plot(
     btbby=0,
     topledgettl="Lithology",
     bottomledgettl="NPR",
-    btmldglbls=["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"],
+    btmldglbls=["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"], # no more lists as defaults, this goes for all
     bold=False,
     thrdbby=0.1,
     thrdbbx=0.985,
@@ -322,7 +322,9 @@ def pca_plot(
     # get color range
     colors = np.linspace(0, 1, len(df[lith].unique()))
 
-    lith_present = [l for l in lith_order_in if l in df[lith].unique()]
+    lith_present = [l for l in lith_order_in if l in df[lith].unique()] #fix this to match the old version
+                    # also rather than make a list, just reindex by the order
+                    # that might get around the "noneexisting" sample problem
 
     # make copy of df to avoid altering original
     temp = df.copy()
@@ -650,7 +652,7 @@ def pca_plot_old(
 
     lith_present = [l for l in lith_order_in if l in unique_lith_in]
 
-    if sorted(unique_lith_in) != sorted(lith_order_in):
+    if sorted(unique_lith_in) != sorted(lith_present):
         warnings.warn(
             "Lithologies in sample not present in chosen lith order, appending to end"
         )
