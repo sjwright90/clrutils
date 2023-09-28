@@ -27,7 +27,9 @@ def CLR(X):
     return Y
 
 
-def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
+def clr_trans_scale(
+    df, subset_start=None, subset_end=None, scale=True
+) -> DataFrame | tuple[DataFrame, DataFrame]:
     """
     Apply center log ratio transformation and scale results
 
