@@ -5,6 +5,21 @@ from clrutils import Lith_order
 import matplotlib.cm as cm
 from importlib import reload
 from clrutils.pca_preprop import npr_to_bins
+import string
+import numpy as np
+# %%
+
+test_df = pd.DataFrame({st: np.random.choice(list(string.ascii_uppercase), 20) for st in string.ascii_lowercase[:5]})
+# %%
+order = list(string.ascii_uppercase)
+np.random.shuffle(order)
+
+# %%
+test = test_df.a.unique().tolist()
+
+indices = {i: order.index(i) for i in order}
+
+sorted(test, key=indices.get)
 # %%
 import clrutils
 reload(clrutils.pca_plots)

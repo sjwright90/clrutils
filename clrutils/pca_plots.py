@@ -142,7 +142,7 @@ def pca_plot(
     pca2a="PC2",
     alpha_sct=1.0,
     alpha_lns=0.8,
-    lith_order_in=Lith_order,
+    lith_order_in=None,
     title="PCA Bi-Plot",
     x_axispca=1,
     y_axispca=2,
@@ -155,7 +155,7 @@ def pca_plot(
     btbby=0,
     topledgettl="Lithology",
     bottomledgettl="NPR",
-    btmldglbls=["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"], # no more lists as defaults, this goes for all
+    btmldglbls=None,
     bold=False,
     thrdbby=0.1,
     thrdbbx=0.985,
@@ -306,6 +306,11 @@ def pca_plot(
         "This is an experimental version of pca_plot() if it breaks, let me know and use pca_plot_old() instead"
     )
 
+    if btmldglbls is None:
+        btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
+    if lith_order_in is None:
+        lith_order_in = Lith_order
+
     # call line plot function
     if loading_lines:
         figt, axt = loadings_line_plot(
@@ -319,12 +324,20 @@ def pca_plot(
     else:
         figt, axt = plt.subplots(figsize=(10, 10))
 
-    # get color range
-    colors = np.linspace(0, 1, len(df[lith].unique()))
+    unique_lith_in = df[lith].unique()
 
-    lith_present = [l for l in lith_order_in if l in df[lith].unique()] #fix this to match the old version
-                    # also rather than make a list, just reindex by the order
-                    # that might get around the "noneexisting" sample problem
+    # get color range
+    colors = np.linspace(0, 1, len(unique_lith_in))
+
+    lith_present = [l for l in lith_order_in if l in unique_lith_in]
+
+    if sorted(unique_lith_in) != sorted(lith_present):
+        warnings.warn(
+            "Lithologies in sample not present in chosen lith order, appending to end"
+        )
+        lith_present = lith_present + [
+            l for l in unique_lith_in if l not in lith_present
+        ]
 
     # make copy of df to avoid altering original
     temp = df.copy()
@@ -498,7 +511,7 @@ def pca_plot_old(
     pca2a="PC2",
     alpha_sct=1.0,
     alpha_lns=0.8,
-    lith_order_in=Lith_order,
+    lith_order_in=None,
     title="PCA Bi-Plot",
     x_axispca=1,
     y_axispca=2,
@@ -512,7 +525,7 @@ def pca_plot_old(
     btbby=0,
     topledgettl="Lithology",
     bottomledgettl="NPR",
-    btmldglbls=["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"],
+    btmldglbls=None,
     bold=False,
 ):
     """
@@ -632,6 +645,11 @@ def pca_plot_old(
         matplotlib.pyplot axes
     """
 
+    # set mutable defaults
+    if btmldglbls is None:
+        btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
+    if lith_order_in is None:
+        lith_order_in = Lith_order
     # call line plot function
     if loading_lines:
         figt, axt = loadings_line_plot(

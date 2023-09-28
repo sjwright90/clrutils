@@ -109,7 +109,7 @@ def pc_scaler(series):
 
 
 def make_df_for_biplot(
-    trnf_data, full_df, col_list=["lith", "lab"], num_comp=2, scale=True, prefix="PC"
+    trnf_data, full_df, col_list=None, num_comp=2, scale=True, prefix="PC"
 ):
     """
     Extract PCs and relevant columns for bi-plots
@@ -141,6 +141,9 @@ def make_df_for_biplot(
         Dataframe. Components have a min-max scaler applied to them.
     """
 
+    if col_list is None:
+        col_list = ["lith", "lab"]
+
     colnames = [f"{prefix}{x+1}" for x in range(num_comp)]
     temp = DataFrame(zip(*trnf_data[:, 0:num_comp].T)).join(full_df[col_list])
     temp.columns = colnames + col_list
@@ -152,7 +155,7 @@ def make_df_for_biplot(
 
 
 def npr_to_bins(
-    nprseries, bins=[0.2, 2, 3], min_size=15, max_size=300, reverse=False, label="NPR"
+    nprseries, bins=None, min_size=15, max_size=300, reverse=False, label="NPR"
 ):
     """
     Convert NPR values to bins
@@ -179,6 +182,8 @@ def npr_to_bins(
     splits_cat, splits_size
         Categorical and numerical splits of NPR values
     """
+    if bins is None:
+        bins = [0.2, 2, 3]
     bins = [-np.inf] + bins + [np.inf]
     lbstrt = [f"{label}<{bins[1]}"]
     lbend = [f"{label}>{bins[-2]}"]
