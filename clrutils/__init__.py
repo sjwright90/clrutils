@@ -4,4 +4,5 @@ from clrutils.submods.attr import (
     compiled_liths,
     t_fill,
     ksm_py_path_str,
+    ksm_top_path_str,
 )
