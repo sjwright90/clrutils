@@ -6,6 +6,11 @@ ksm_py_path_str = (
     / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/03 Technical Work/00 Python_R"
 )
 
+ksm_top_path_str = (
+    Path().home()
+    / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/"
+)
+
 # fuck I really need to consolodqte this with the other one
 Lith_order = [
     "K1",  # intrusions
