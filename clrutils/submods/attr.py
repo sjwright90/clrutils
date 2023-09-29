@@ -12,6 +12,8 @@ ksm_top_path_str = (
 )
 
 # fuck I really need to consolodqte this with the other one
+# actually this just needs its own like "setupksm" file or something
+# like not even a package perse, just an environment setup, problem for later
 Lith_order = [
     "K1",  # intrusions
     "K2",
