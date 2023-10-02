@@ -128,6 +128,7 @@ def loadings_line_plot(
     return figt, axt
 
 
+# Edge color not working for the exploration plots, not sure why, the exp plots also have other problems
 def pca_plot(
     df,
     pca_df,
