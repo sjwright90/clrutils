@@ -11,7 +11,7 @@ ksm_top_path_str = (
     / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/"
 )
 
-# fuck I really need to consolodqte this with the other one
+# I really need to consolodqte this with the other one
 # actually this just needs its own like "setupksm" file or something
 # like not even a package perse, just an environment setup, problem for later
 Lith_order = [
