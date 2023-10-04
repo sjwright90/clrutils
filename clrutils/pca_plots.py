@@ -491,16 +491,22 @@ def pca_plot(
     # set plot title
     axt.set_title(title, size=20)
 
-    # set x-axis label
-    axt.set_xlabel(
-        f"Principal component {x_axispca} ({round(pca_obj[x_axispca-1]*100,2)}%)",
-        size=15,
-    )
-    # set y-axis label
-    axt.set_ylabel(
-        f"Principal component {y_axispca} ({round(pca_obj[y_axispca-1]*100,2)}%)",
-        size=15,
-    )
+    if pca_obj is not None:  # only label if pca_obj given
+        # set x-axis label
+        axt.set_xlabel(
+            f"Principal component {x_axispca} ({round(pca_obj[x_axispca-1]*100,2)}%)",
+            size=15,
+        )
+        # set y-axis label
+        axt.set_ylabel(
+            f"Principal component {y_axispca} ({round(pca_obj[y_axispca-1]*100,2)}%)",
+            size=15,
+        )
+    else:
+        axt.set_xlabel(
+            f"{pca1a}", size=15
+        )  # if pca not given use column names to label axis
+        axt.set_ylabel(f"{pca2a}", size=15)
     # turn on grid
     axt.grid()
 
