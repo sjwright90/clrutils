@@ -467,7 +467,14 @@ def pca_plot(
     # lithologies in the plot
     leg_elem = [
         Line2D(
-            [], [], markersize=10, marker="o", color="white", label=a, markerfacecolor=b
+            [],
+            [],
+            markersize=10,
+            marker="o",
+            color="white",
+            label=a,
+            markerfacecolor=b,
+            # alpha=alpha_sct, # this works, not sure I like it though
         )
         for a, b in zip(lith_present, cmapin(colors))
     ]
