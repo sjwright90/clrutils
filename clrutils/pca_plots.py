@@ -336,7 +336,9 @@ def pca_plot(
 
     lith_present = [l for l in lith_order_in if l in unique_lith_in]
 
-    if sorted(unique_lith_in) != sorted(lith_present):
+    if sorted(unique_lith_in) != sorted(
+        lith_present
+    ):  # NaNs break this find a solution
         warnings.warn(
             "Lithologies in sample not present in chosen lith order, appending to end"
         )
