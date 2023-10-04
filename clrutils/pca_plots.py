@@ -313,6 +313,9 @@ def pca_plot(
     if lith_order_in is None:
         lith_order_in = Lith_order
 
+    if pca_df is None:  # automatically set loading_lines to False if pca_df is None
+        loading_lines = False
+
     # call line plot function
     if loading_lines:
         figt, axt = loadings_line_plot(
