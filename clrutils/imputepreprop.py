@@ -237,7 +237,7 @@ def casematch(val, cols):
 # %%
 
 
-def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
+def pct_to_ppm(df, subset=None, rename=True, pct_tag=None, new_tag="ppm"):
     """
     Changes scale of pct columns to ppm.
 
@@ -251,8 +251,8 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
     rename : bool, default True
         Whether to rename columns in place.
 
-    pct_tag : str, default 'pct'
-        Substring identifying percentile columns.
+    pct_tag : list, default ['pct']
+        List of substrings to search for to change.
 
     new_tag : str, default 'ppm'
         Substring to rename the columns.
@@ -262,19 +262,22 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag="pct", new_tag="ppm"):
     None
         Changes the data in place.
     """
+    if pct_tag is None:
+        pct_tag = ["pct"]
     new_names = {}
     if subset is not None:
         subset = [s for s in subset if s in df.columns]
         for col in df[subset]:
-            if pct_tag in col:
-                df[col] = df[col] * 10000
-                new_names[col] = col.replace(pct_tag, new_tag)
+            for tag in pct_tag:
+                if tag in col:
+                    df[col] = df[col] * 10000
+                    new_names[col] = col.replace(tag, new_tag)
     else:
         for col in df:
-            if pct_tag in col:
-                df[col] = df[col] * 10000
-                new_names[col] = col.replace(pct_tag, new_tag)
-
+            for tag in pct_tag:
+                if tag in col:
+                    df[col] = df[col] * 10000
+                    new_names[col] = col.replace(tag, new_tag)
     if rename:
         df.rename(columns=new_names, inplace=True)
 
