@@ -270,12 +270,20 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag=None, new_tag="ppm"):
         for col in df[subset]:
             for tag in pct_tag:
                 if tag in col:
+                    try:
+                        assert df[col].max() <= 100
+                    except AssertionError:
+                        print(f"Warning, {col} has values greater than 100.")
                     df[col] = df[col] * 10000
                     new_names[col] = col.replace(tag, new_tag)
     else:
         for col in df:
             for tag in pct_tag:
                 if tag in col:
+                    try:
+                        assert df[col].max() <= 100
+                    except AssertionError:
+                        print(f"Warning, {col} has values greater than 100.")
                     df[col] = df[col] * 10000
                     new_names[col] = col.replace(tag, new_tag)
     if rename:
