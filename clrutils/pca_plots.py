@@ -329,6 +329,11 @@ def pca_plot(
     else:
         figt, axt = plt.subplots(figsize=(10, 10))
 
+    # make copy of df to avoid altering original
+    temp = df.copy()
+
+    temp.dropna(subset=[lith], inplace=True)  # drop NaNs in lith column])
+
     unique_lith_in = df[lith].unique()
 
     # get color range
@@ -345,9 +350,6 @@ def pca_plot(
         lith_present = lith_present + [
             l for l in unique_lith_in if l not in lith_present
         ]
-
-    # make copy of df to avoid altering original
-    temp = df.copy()
 
     # dictionary to map lithologies to unique color spectrum
     color_dict = dict(zip(lith_present, colors))
