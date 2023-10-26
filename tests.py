@@ -9,6 +9,7 @@ import string
 import numpy as np
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+import matplotlib.pyplot as plt
 
 
 # %%
@@ -65,7 +66,7 @@ sorted(test, key=indices.get)
 # %%
 import clrutils
 
-reload(clrutils.pca_plots)
+# reload(clrutils.pca_plots)
 from clrutils.pca_plots import pca_plot
 
 # %%
@@ -82,7 +83,7 @@ npr_jitter = np.random.rand(100) * 0.1
 npr_binary = np.random.choice([0, 1], 100)
 npr_binary = np.where(npr_binary == 0, -1, npr_binary)
 npr = npr + npr_jitter * npr_binary
-npr_labels, npr_sizes = npr_to_bins(pd.Series(npr), min_size=25, max_size=350)
+npr_labels, npr_sizes = npr_to_bins(pd.Series(npr), min_size=35, max_size=350)
 pc1 = (np.random.rand(100) - 0.5) * 2
 pc2 = (np.random.rand(100) - 0.5) * 2
 
@@ -109,6 +110,7 @@ test_ldg = pd.DataFrame(
 )
 
 pca_obj = [0.5, 0.5]
+
 # %%
 params = {
     "style": "deposit",
@@ -130,7 +132,7 @@ t1, a1 = pca_plot(
     cmapin=cmap,  # type: ignore
     thrdbby=0.15,
     btbbx=0.989,
-    **params,
+    # **params,
 )
 t1.set_size_inches(12, 12)
 
@@ -163,7 +165,24 @@ params = {
     "ax": axx,
 }
 
-sns.scatterplot(
+sns_obj = sns.scatterplot(
     data=test_df, x="PC1", y="PC2", hue="lithology_relog", style="deposit", **params
+)
+# %%
+legend_handles, legend_labels = sns_obj.get_legend_handles_labels()
+legend_sizes = [line.get_sizes()[0] for line in legend_handles]
+# %%
+
+
+plt_obj = plt.scatter(
+    test_df["PC1"],
+    test_df["PC2"],
+    c=test_df["npr_calc"],
+    s=test_df["npr_sizes"],
+    cmap=cmap,
+    alpha=0.5,
+    edgecolor="k",
+    linewidth=0.5,
+    marker="o",
 )
 # %%

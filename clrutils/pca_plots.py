@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.cm as cm
-from pandas import Categorical, DataFrame
+from pandas import Categorical, Series
 from sklearn.decomposition import PCA
 from clrutils import Lith_order
 import seaborn as sns
@@ -201,7 +201,7 @@ def pca_plot(
     lith : str, default 'Lithology'
         Name of column in 'df' with the lithologies.
 
-    npr_size : str or int or list like len df, default 'NPR', optional
+    npr_size : str or int or list like len df, default 'npr_size', optional
         Name of column in df with NPR size categories,
         the values in this column will correspond directly to the size of
         the plotted points, column needs to be numerical.
@@ -409,21 +409,20 @@ def pca_plot(
         npr_labels = btmldglbls
         # size of npr circles in legend (different from plot because
         # they are built on different scales)
-        npr_leg_size = np.linspace(5, 15, len(btmldglbls))
-
+        legend_sizes = np.linspace(7, 16, len(btmldglbls))
         # make legend handles for NPR size legend
         # number of 'o' markers equal to number of sizes
         leg_1_handles = [
             Line2D(
                 [],
                 [],
-                markersize=a,
+                markersize=size,
                 marker="o",
                 color="w",
                 markerfacecolor="grey",
-                label=b,
+                label=label,
             )
-            for a, b in zip(npr_leg_size, npr_labels)
+            for size, label in zip(legend_sizes, npr_labels)
         ]
         # construct first legend
         # locate in bottom right
@@ -434,6 +433,7 @@ def pca_plot(
             borderaxespad=1.0,
             frameon=False,
         )
+
         # set first legend title
         first_legend.set_title(bottomledgettl, prop={"size": 15})  # type: ignore
         # add first legend as artist
@@ -824,6 +824,9 @@ def pca_plot_old(
     axt.grid()
 
     return figt, axt
+
+
+# %%
 
 
 # %%
