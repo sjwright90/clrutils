@@ -671,7 +671,7 @@ def pca_plot_old(
 
     # set mutable defaults
     if btmldglbls is None:
-        btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
+        btmldglbls = ["NPR<0.2", "0.2<NPR<3", "NPR>3"]
     if lith_order_in is None:
         lith_order_in = Lith_order
     # call line plot function
