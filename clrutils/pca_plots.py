@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.cm as cm
-from pandas import Categorical, Series
+from pandas import Categorical, DataFrame
 from sklearn.decomposition import PCA
 from clrutils import Lith_order
 import seaborn as sns
