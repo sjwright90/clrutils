@@ -167,7 +167,7 @@ def npr_to_bins(
     nprseries : pandas series
         Series of NPR values
 
-    bins : list, default [0.2, 2, 3]
+    bins : list, default [0.2, 3] # JVG Removed 2 bin
         List of bin edges, -np.inf and np.inf are added to the
         beginning and end of the list respectively
 
@@ -185,7 +185,7 @@ def npr_to_bins(
         Categorical and numerical splits of NPR values
     """
     if bins is None:
-        bins = [0.2, 2, 3]
+        bins = [0.2, 3] # JVG Removed 2 bin
     bins = [-np.inf] + bins + [np.inf]
     lbstrt = [f"{label}<{bins[1]}"]
     lbend = [f"{label}>{bins[-2]}"]
