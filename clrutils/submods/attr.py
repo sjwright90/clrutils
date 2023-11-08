@@ -96,8 +96,8 @@ compiled_liths = [
 ]
 t_fill = [
     "Intrusions",
-    "K-intrustions",
-    "P-intrustions",
+    "K-intrusions",
+    "P-intrusions",
     "Breccias",
     "Wallrock",
     "Other",
