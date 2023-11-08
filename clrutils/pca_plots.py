@@ -310,8 +310,6 @@ def pca_plot(
 
     if btmldglbls is None:
         btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
-    if lith_order_in is None:
-        lith_order_in = Lith_order
 
     if pca_df is None:  # automatically set loading_lines to False if pca_df is None
         loading_lines = False
@@ -335,6 +333,9 @@ def pca_plot(
     temp.dropna(subset=[lith], inplace=True)  # drop NaNs in lith column
 
     temp.reset_index(inplace=True, drop=True)
+
+    if lith_order_in is None:
+        lith_order_in = Lith_order
 
     unique_lith_in = df[lith].unique()
 
@@ -672,8 +673,7 @@ def pca_plot_old(
     # set mutable defaults
     if btmldglbls is None:
         btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
-    if lith_order_in is None:
-        lith_order_in = Lith_order
+
     # call line plot function
     if loading_lines:
         figt, axt = loadings_line_plot(
@@ -687,26 +687,34 @@ def pca_plot_old(
     else:
         figt, axt = plt.subplots(figsize=(10, 10))
 
-    # get color range
-    unique_lith_in = df[lith].unique()
+    if lith_order_in is None:
+        print("none")
+        lith_order_in = Lith_order
+        # get color range
+        unique_lith_in = df[lith].unique()
 
-    colors = np.linspace(0, 1, len(unique_lith_in))
+        colors = np.linspace(0, 1, len(unique_lith_in))
 
-    lith_present = [l for l in lith_order_in if l in unique_lith_in]
+        lith_present = [l for l in lith_order_in if l in unique_lith_in]
+        # dictionary to map lithologies to unique color spectrum
+        color_dict = dict(zip(lith_present, colors))
+    else:
+        lith_present = lith_order_in
+        unique_lith_in = df[lith].unique()
+        colors = np.linspace(0, 1, len(lith_present))
+        color_dict = dict(zip(lith_present, colors))
+        print(color_dict)
 
-    if sorted(unique_lith_in) != sorted(lith_present):
-        warnings.warn(
-            "Lithologies in sample not present in chosen lith order, appending to end"
-        )
-        lith_present = lith_present + [
-            l for l in unique_lith_in if l not in lith_present
-        ]
+    # if sorted(unique_lith_in) != sorted(lith_present):
+    #     warnings.warn(
+    #         "Lithologies in sample not present in chosen lith order, appending to end"
+    #     )
+    #     lith_present = lith_present + [
+    #         l for l in unique_lith_in if l not in lith_present
+    #     ]
 
     # make copy of df to avoid altering original
     temp = df.copy()
-
-    # dictionary to map lithologies to unique color spectrum
-    color_dict = dict(zip(lith_present, colors))
 
     # map lithologies to new 'color' column
     # apply cmap to turn linspace into rgb color from matplotlib cm

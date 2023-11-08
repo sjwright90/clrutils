@@ -110,15 +110,9 @@ test_ldg = pd.DataFrame(
 )
 
 pca_obj = [0.5, 0.5]
-
 # %%
-params = {
-    "style": "deposit",
-    "markers": ["*", "v", "o"],
-}
-
 t1, a1 = pca_plot(
-    test_df,
+    test_df[test_df.lithology_relog.isin(["A", "I", "D", "C", "G", "B", "H"])],
     test_ldg,
     pca_obj,
     lith="lithology_relog",
@@ -129,12 +123,60 @@ t1, a1 = pca_plot(
     alpha_lns=0.5,
     edgecolor=True,
     loading_lines=True,  # type: ignore
-    cmapin=cmap,  # type: ignore
+    # cmapin=cmap,  # type: ignore
     thrdbby=0.15,
     btbbx=0.989,
     # **params,
 )
 t1.set_size_inches(12, 12)
+# %%
+cmap_dict = {
+    "A": "darkorange",
+    "B": "gold",
+    "C": "lawngreen",
+    "D": "lightseagreen",
+    "E": "royalblue",
+    "F": "darkblue",
+    "G": "darkviolet",
+    "H": "magenta",
+    "I": "crimson",
+}
+
+# %%
+liths_linspace = np.linspace(0, 1, len(liths))
+
+turbo_colors_from_linspace = [cm.turbo(x) for x in liths_linspace]
+
+turbo_cmap_dict = {lith: turbo_colors_from_linspace[i] for i, lith in enumerate(liths)}
+# %%
+params = {
+    "style": "deposit",
+    "markers": ["*", "v", "o"],
+}
+for test_group in [
+    ["A", "C", "D", "G"],
+    ["G", "B", "E", "F", "H", "I"],
+    ["C", "B", "A"],
+]:
+    cmap = ListedColormap([turbo_cmap_dict[i] for i in sorted(test_group)])  # type: ignore
+    t1, a1 = pca_plot(
+        test_df[test_df.lithology_relog.isin(test_group)],
+        test_ldg,
+        pca_obj,
+        lith="lithology_relog",
+        lith_order_in=sorted(test_group),
+        npr_size="npr_sizes",
+        btmldglbls=test_df.npr_labels.cat.categories.tolist(),
+        alpha_sct=0.5,
+        alpha_lns=0.5,
+        edgecolor=True,
+        loading_lines=True,  # type: ignore
+        cmapin=cmap,  # type: ignore
+        thrdbby=0.15,
+        btbbx=0.989,
+        # **params,
+    )
+    t1.set_size_inches(12, 12)
 
 # %%
 import seaborn as sns
