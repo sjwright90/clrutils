@@ -309,7 +309,7 @@ def pca_plot(
     )
 
     if btmldglbls is None:
-        btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
+        btmldglbls = ["NPR<0.2", "0.2<NPR<3", "NPR>3"]
 
     if pca_df is None:  # automatically set loading_lines to False if pca_df is None
         loading_lines = False
@@ -377,6 +377,7 @@ def pca_plot(
         edg = "k"
     else:
         edg = None
+
     if isinstance(npr_size, str):
         npr_size = temp[npr_size]
 
@@ -410,6 +411,9 @@ def pca_plot(
         npr_labels = btmldglbls
         # size of npr circles in legend (different from plot because
         # they are built on different scales)
+        # plot_sizes = sorted(set(npr_size))
+        # legend_sizes = [np.sqrt(s) for s in plot_sizes]
+        # CLOSE BUT NOT QUITE, STILL USING MANUAL SIZES
         legend_sizes = np.linspace(7, 16, len(btmldglbls))
         # make legend handles for NPR size legend
         # number of 'o' markers equal to number of sizes

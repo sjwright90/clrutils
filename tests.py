@@ -118,7 +118,6 @@ t1, a1 = pca_plot(
     lith="lithology_relog",
     lith_order_in=liths,
     npr_size="npr_sizes",
-    btmldglbls=test_df.npr_labels.cat.categories.tolist(),
     alpha_sct=0.5,
     alpha_lns=0.5,
     edgecolor=True,
