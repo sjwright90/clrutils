@@ -237,7 +237,9 @@ def casematch(val, cols):
 # %%
 
 
-def pct_to_ppm(df, subset=None, rename=True, pct_tag=None, new_tag="ppm"):
+def pct_to_ppm(
+    df, subset=None, rename=True, pct_tag=None, new_tag="ppm", warning_thresh=50
+):
     """
     Changes scale of pct columns to ppm.
 
@@ -257,6 +259,9 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag=None, new_tag="ppm"):
     new_tag : str, default 'ppm'
         Substring to rename the columns.
 
+    warning_thresh : int, default 50
+        Threshold to warn if values are greater than.
+
     Returns
     -----
     None
@@ -271,9 +276,11 @@ def pct_to_ppm(df, subset=None, rename=True, pct_tag=None, new_tag="ppm"):
             for tag in pct_tag:
                 if tag in col:
                     try:
-                        assert df[col].max() <= 50
+                        assert df[col].max() <= warning_thresh
                     except AssertionError:
-                        print(f"Warning, {col} has values greater than 50 pct.")
+                        print(
+                            f"Warning, {col} has values greater than {warning_thresh} pct."
+                        )
                     df[col] = df[col] * 10000
                     new_names[col] = col.replace(tag, new_tag)
     else:
