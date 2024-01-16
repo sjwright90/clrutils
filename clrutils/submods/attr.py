@@ -21,10 +21,23 @@ ksm_py_path_str = (
     / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/03 Technical Work/00 Python_R"
 )
 
+# JVG Alternative path
+ksm_py_path_str_alt = (
+    Path().home()
+    / "Life Cycle Geo, LLC/LCG Server - General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/03 Technical Work/00 Python_R"
+)
+
 ksm_top_path_str = (
     Path().home()
     / "Life Cycle Geo, LLC/LCG Server - Documents/General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/"
 )
+
+# JVG Alternative path
+ksm_top_path_str_alt = (
+    Path().home()
+    / "Life Cycle Geo, LLC/LCG Server - General/PROJECTS/2019/05 19KSM01 - Seabridge Gold - KSM Project/"
+)
+
 
 # I really need to consolodqte this with the other one
 # actually this just needs its own like "setupksm" file or something
