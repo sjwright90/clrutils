@@ -1,8 +1,14 @@
-# %%
+# contains the following functions:
+# regex_pad_sample_name
+# id_unmarked_nd
+# drop_missing
+# check_double_metals
+# casematch
+# pct_to_ppm
+# isolate_metals_match_dfs
+
 import re
 from numpy import nan
-
-# %%
 
 
 def regex_pad_sample_name(srs):

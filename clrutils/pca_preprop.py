@@ -1,3 +1,10 @@
+# contains the following functions:
+# CLR
+# clr_trans_scale
+# pc_scaler
+# make_df_for_biplot
+# npr_to_bins
+
 from pandas import DataFrame, cut
 from sklearn.preprocessing import StandardScaler
 from clrutils.submods.helperfncs import df_anynull
@@ -185,7 +192,7 @@ def npr_to_bins(
         Categorical and numerical splits of NPR values
     """
     if bins is None:
-        bins = [0.2, 3] # JVG Removed 2 bin
+        bins = [0.2, 3]  # JVG Removed 2 bin
     bins = [-np.inf] + bins + [np.inf]
     lbstrt = [f"{label}<{bins[1]}"]
     lbend = [f"{label}>{bins[-2]}"]

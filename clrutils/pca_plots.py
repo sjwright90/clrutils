@@ -1,4 +1,16 @@
-# %%
+# contains the following functions:
+# df_anynull
+# get_max_max
+# loadings_line_plot
+# pca_plot
+# pca_plot_old
+# axis_limits
+# color_bars
+# factor_loading_plot
+# pca_explore
+# pca_loading_matrix
+# loading_matrix
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -8,8 +20,6 @@ from sklearn.decomposition import PCA
 from clrutils import Lith_order
 import seaborn as sns
 import warnings
-
-# %%
 
 
 # quick test of any null/NaN values in df

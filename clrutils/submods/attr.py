@@ -1,4 +1,19 @@
-# lithological order
+# contains the following attributes:
+# ksm_py_path_str
+# ksm_top_path_str
+# Lith_order
+# lith_name_map
+# intrusions
+# k_intrusions
+# p_intrusions
+# breccias
+# wallrock
+# other
+# unid
+# compiled_liths
+# t_fill
+# titles
+
 from pathlib import Path
 
 ksm_py_path_str = (

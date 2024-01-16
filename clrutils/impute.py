@@ -1,3 +1,6 @@
+# contains the following functions:
+# impute_df
+
 from pandas import DataFrame
 import numpy as np
 from sklearn.impute import KNNImputer
