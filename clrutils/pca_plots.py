@@ -162,7 +162,7 @@ def pca_plot(
     edgecolor=True,
     loading_lines=True,
     tpbbx=0.985,
-    tpbby=1.05,
+    tpbby=1.04,
     btbbx=0.985,
     btbby=0,
     topledgettl="Lithology",
