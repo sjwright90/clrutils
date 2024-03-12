@@ -74,6 +74,10 @@ def impute_df(df, subset=None, scale=False, neigh=5):
     if not temp_ND_NaN_imputed.index.equals(temp_ND_NaN.index):
         temp_ND_NaN_imputed.index = temp_ND_NaN.index
 
+    if scale:
+        # Inverse transform the imputed values
+        temp_ND_NaN_imputed = scaler.inverse_transform(temp_ND_NaN_imputed)
+
     temp_ND_NaN.update(temp_ND_NaN_imputed)
 
     return temp_ND_NaN
