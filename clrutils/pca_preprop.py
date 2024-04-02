@@ -185,7 +185,10 @@ def npr_to_bins(
         Maximum size of label to return
 
     reverse : bool, default False
-        Whether to reverse the order of the binsS
+        Whether to reverse the order of the bins
+
+    label : str, default 'NPR'
+        Label for the NPR values
     Returns
     -----
     splits_cat, splits_size
