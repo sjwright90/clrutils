@@ -297,7 +297,7 @@ def pca_plot(
         markers to use for each style. will likely end up with a shitty legend so have fun with that.
         Also have to pass "style_order" to get the legend to work, this is the order of the styles,
         take it from the column you are using for style, but can be any order you want.
-        -note: damn it Sam, what the F does this mean?
+
         an example would look like this:
             params = {
                 "style": "deposit",
@@ -369,7 +369,22 @@ def pca_plot(
 
     # map lithologies to new 'color' column
     # apply cmap to turn linspace into rgb color from matplotlib cm
-    temp["color"] = temp[lith].replace(color_dict).apply(cmapin)
+    # if cmap is a dictionary, use it to map colors, else use cmap as is
+    if isinstance(cmapin, dict):
+        print("using cmap as dictionary")
+        temp["color"] = temp[lith].replace(cmapin)
+    # else if cmap is a pyplot colormap, use it to map colors
+    elif isinstance(cmapin, cm.colors.Colormap):
+        temp["color"] = temp[lith].replace(color_dict).apply(cmapin)
+        cmapin = cm.colors.ListedColormap([cmapin(i) for i in colors])
+        # make cmapin a dictionary for use in legend
+        cmapin = {l: cmapin(i) for i, l in enumerate(lith_present)}
+    # else print warning and use turbo
+    else:
+        warnings.warn("Colormap not recognized, using matplotlib.cm.turbo as default")
+        temp["color"] = temp[lith].replace(color_dict).apply(cm.turbo)
+        # make cmapin a dictionary for use in legend
+        cmapin = {l: cm.turbo(i) for i, l in enumerate(lith_present)}
 
     # make lithology a categorical column
     # have to do second due to multi-index problems
@@ -494,10 +509,10 @@ def pca_plot(
             marker="o",
             color="white",
             label=a,
-            markerfacecolor=b,
+            markerfacecolor=cmapin[a],
             # alpha=alpha_sct, # this works, not sure I like it though
         )
-        for a, b in zip(lith_present, cmapin(colors))
+        for a in lith_present
     ]
     # construct second legend, pad to avoid cutting off legend 1
     axt.legend(

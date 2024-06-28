@@ -111,18 +111,25 @@ test_ldg = pd.DataFrame(
 
 pca_obj = [0.5, 0.5]
 # %%
+cmap_dict = {lith: cmap.colors[i] for i, lith in enumerate(liths)}
+# %%
+sorted(
+    cmap_dict.keys(),
+    key=np.random.choice(liths, len(liths), replace=False).tolist().index,
+)
+# %%
 t1, a1 = pca_plot(
-    test_df[test_df.lithology_relog.isin(["A", "I", "D", "C", "G", "B", "H"])],
+    test_df.sample(frac=1, random_state=42, replace=False),
     test_ldg,
     pca_obj,
     lith="lithology_relog",
-    lith_order_in=liths,
+    lith_order_in=np.random.choice(liths, len(liths), replace=False),
     npr_size="npr_sizes",
     alpha_sct=0.5,
     alpha_lns=0.5,
     edgecolor=True,
-    loading_lines=True,  # type: ignore
-    # cmapin=cmap,  # type: ignore
+    loading_lines=True,  # type: i
+    cmapin=cmap_dict,
     thrdbby=0.15,
     btbbx=0.989,
     # **params,
