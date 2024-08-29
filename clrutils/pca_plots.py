@@ -63,33 +63,35 @@ def get_max_max(x, y):
     return max(xmax, ymax)
 
 
+# define loadings_line_plot function
 def loadings_line_plot(
-    pca_df,
+    ldg_mat,
     pca1="PC1",
     pca2="PC2",
     alpha_lns=0.8,
-    metals="metals",
+    labels="metals",
     figsz=10,
     t_sz=11,
+    color="y",
     bold=False,
-):
+) -> tuple:
     """
-    Makes plot of metals loadings for principal components.
+    Makes plot of labels loadings for principal components.
 
     Parameters
     ----------
-    pca_df : pandas dataframe
-        Contains PCA loadings for metals, rows are metals, columns are PCA
+    ldg_mat : pandas dataframe
+        Contains PCA loadings for labels, rows are labels, columns are PCA
         loadings and labels.
 
     pca1 : str, default 'PCA1'
-        Column in 'pca_df' with PCA1 values (x-axis).
+        Column in 'ldg_mat' with PCA1 values (x-axis).
 
     pca2 : str, default 'PCA2'
-        Column in 'pca_df' with PCA2 values (y-axis).
+        Column in 'ldg_mat' with PCA2 values (y-axis).
 
-    metals : str, default 'metals'
-        Column in 'pca_df' with metal names
+    labels : str, default 'metals'
+        Column in 'ldg_mat' with metal names
 
     alpha_lns : float(0-1), default 1
         Alpha value for metal loading lines.
@@ -100,31 +102,34 @@ def loadings_line_plot(
 
     Returns
     -----
-    figt
+    fig
         Matplotlib.pyplot figure object
 
-    axt
+    ax
         Matplotlib.pyplot axis object
     """
 
     # make subplot
-    figt, axt = plt.subplots(figsize=(figsz, figsz))
+    fig, ax = plt.subplots(figsize=(figsz, figsz))
     # plot element loadings
     # matrix of 0s
-    zros = np.zeros(len(pca_df))
+    zros = np.zeros(len(ldg_mat))
     # plot lines from origin to points
-    axt.plot([zros, pca_df[pca1]], [zros, pca_df[pca2]], color="y", alpha=alpha_lns)
-    # add axis lines
-    axt.hlines([0], [-1.5], [1.5], colors="k", linestyles="--", alpha=0.6)  # type: ignore
-    axt.vlines([0], [-1.5], [1.5], colors="k", linestyles="--", alpha=0.6)  # type: ignore
+    ax.plot([zros, ldg_mat[pca1]], [zros, ldg_mat[pca2]], color=color, alpha=alpha_lns)
+    # add axis lines spanning the plot
+    ax.axhline(0, color="k", linestyle="--", alpha=0.7)
+    ax.axvline(0, color="k", linestyle="--", alpha=0.7)
 
     wgth = "normal"
     if bold:
         wgth = "bold"
 
+    if not (pca1 in ldg_mat.columns) or not (pca2 in ldg_mat.columns):
+        raise ValueError(f"Columns {pca1} and {pca2} must be in ldg_mat.")
+
     # set element labels
-    for loc, lab in zip(pca_df[[pca1, pca2]].values, pca_df[metals]):
-        axt.annotate(
+    for loc, lab in zip(ldg_mat[[pca1, pca2]].values, ldg_mat[labels]):
+        ax.annotate(
             lab,
             xy=loc * 1.1,
             size=t_sz,
@@ -135,735 +140,159 @@ def loadings_line_plot(
             weight=wgth,
         )
 
-    return figt, axt
+    return fig, ax
 
 
-# Edge color not working for the exploration plots, not sure why, the exp plots also have other problems
-# cannot reproduce the problem, but keep an eye out for it
 def pca_plot(
-    df,
-    pca_df,
-    pca_obj,
-    pca1="PC1",
-    pca2="PC2",
-    metals="metals",
-    lith="lithology_relog",
-    npr_size="npr_size",
-    cmapin=cm.turbo,  # type: ignore
-    pca1a="PC1",
-    pca2a="PC2",
-    alpha_sct=1.0,
-    alpha_lns=0.8,
-    lith_order_in=None,
-    title="PCA Bi-Plot",
-    x_axispca=1,
-    y_axispca=2,
-    plot_npr=True,
-    edgecolor=True,
-    loading_lines=True,
-    tpbbx=0.985,
-    tpbby=1.04,
-    btbbx=0.985,
-    btbby=0,
-    topledgettl="Lithology",
-    bottomledgettl="NPR",
-    btmldglbls=None,
-    bold=False,
-    thrdbby=0.1,
-    thrdbbx=0.985,
-    l3_title="Deposit",
+    plot_df,
+    ldg_mat,
+    exp_var,
+    hue_col,
+    style_col,
+    size_col,
+    palette_dict,
+    marker_dict,
     **kwargs,
-):
+) -> tuple:
     """
-    Makes PCA bi-plot with metals loading, this is a rebuild using
-    seaborn instead of matplotlib, experimental version
+    Makes a PCA plot with loadings and data points.
 
     Parameters
     ----------
-    df  pandas dataframe
-        At minimum has columns for sample lithology, NPR sizes,
-        and 2 principal components.
+    plot_df : pandas dataframe
+        Contains data to be plotted.
 
-    pca_df : pandas dataframe | None
-        Contains PCA loadings for metals, structured as follows:
-        rows are metals, columns are PCA loadings and labels
-        to be passed to loadings_line_plot.
-        If loading_lines=False, set 'pca_df=None'.
+    ldg_mat : pandas dataframe
+        Contains PCA loadings for metals, rows are metals, columns are PCA
+        loadings and labels.
 
-    pca_obj : array-like, with len>=2
-        The percentage of variance explained by the PCA values being plotted.
+    exp_var : list
+        List of floats with explained variance for PC1 and PC2.
 
-    pca1 : str, default 'PCA1', optional
-        Name of column in pca_df with PCA1 values (x-axis)
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
+    hue_col : str
+        Column in 'plot_df' to use for color.
 
-    pca2 : str, default 'PCA2', optional
-        Name of column in pca_df with PCA2 values (y-axis)
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
+    style_col : str
+        Column in 'plot_df' to use for style.
 
-    metals : st, default 'metals', optional
-        Name of column in pca_df with metal names for labeling,
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
+    size_col : str
+        Column in 'plot_df' to use for size.
 
-    lith : str, default 'Lithology'
-        Name of column in 'df' with the lithologies.
+    palette_dict : dict
+        Dictionary with color palette for 'hue_col'.
+        Example: {'sandstone': 'orange', 'shale': 'blue'}
+        Must correspond to unique values in 'hue_col'.
 
-    npr_size : str or int or list like len df, default 'npr_size', optional
-        Name of column in df with NPR size categories,
-        the values in this column will correspond directly to the size of
-        the plotted points, column needs to be numerical.
+    marker_dict : dict
+        Dictionary with markers for 'style_col'.
+        Example: {'quartz': 'P', 'feldspar': 'o'}
+        Must correspond to unique values in 'style_col'.
 
-    cmapin = matplotlib colormap object, default cm.turbo
-        Colormap to be used for coloring the points by lithology.
+    **kwargs
+        Additional keyword arguments to pass to the function.
+        Options include:
+        x : str, default 'PC1'
+            Column in 'plot_df' to use for x-axis.
+            Must match column in 'ldg_mat'.
 
-    pca1a : str, default 'PCA1'
-        Name of column in df with PCA1 (x-axis).
+        y : str, default 'PC2'
+            Column in 'plot_df' to use for y-axis.
+            Must match column in 'ldg_mat'.
 
-    pca2a : str, default 'PCA2'
-        Name of column in df with PCA2 (y-axis).
+        style_order : list, default None
+            Order of style categories.
 
-    alpha_sct : float(0-1) or str, default 1
-        If float, alpha value for scatterplot points
-        If str, column in df to use for alpha values, the column
-        must have numerical values (0-1).
+        sizes : tuple, default (200, 50)
+            Tuple with sizes for 'size_order'.
 
-    alpha_lns : float(0-1), default 1
-        Alpha value for metal loading lines, passed to loadings_line_plot.
-        If loading_lines=False this variable is ignored.
+        size_order : list, default None
+            Order of size categories.
 
-    lith_order_in : list-like strings, default Lith_order
-        The order in which to list the lithologies in the legend.
+        alpha : float(0-1) or string, default 0.8
+            Alpha value for data points. If string must be a column in 'plot_df' with values between 0 and 1.
 
-    title : str, default 'PCA Bi-Plot'
-        Title to give the plot.
-
-    x_axispca : int, default 1
-        Index+1 location in pca_obj of variance explained for PCA1.
-        Must be less than len(pca_obj).
-
-    y_axispca : int, default 2
-        Index+1 location in pca_obj of variance explained for PCA2.
-        Must be less than len(pca_obj).
-
-    plot_npr : bool, default True
-        Whether to include NPR size legend
-
-    edgecolor : bool, default True
-        Use edgecolor on markers in plot, if True edgecolor='k'.
-
-    loading_lines : bool, default True
-        Whether to call loadings_line_plot() function.
-        If False set pca_df=None
-
-    tpbbx : float
-        x of bounding box to anchor for main legend
-
-    tpbby : float
-        y of bounding box to anchor for main legend
-
-    btbbx : float
-        x of bounding box to anchor for NPR legend
-
-    btbby : float
-        y of bounding box to anchor for NPR legend
-
-    topledgettl : str
-        Title for top legend
-
-    bottomledgettl : str
-        Title for bottom legend
-
-    btmldglbls : list-like strings
-        Labels for bottom legend
-
-    bold : bool, default False
-        Whether to bold the metal labels on the loading lines
-
-    thrdbby : float
-        y of bounding box to anchor for third legend
-
-    thrdbbx : float
-        x of bounding box to anchor for third legend
-
-    l3_title : str
-        Title for third legend, if using
-
-    **kwargs : dict
-        keywords, pretty much reserved for style and markers to pass to sns,
-        style is the column in df to use for style, markers is the list of
-        markers to use for each style. will likely end up with a shitty legend so have fun with that.
-        Also have to pass "style_order" to get the legend to work, this is the order of the styles,
-        take it from the column you are using for style, but can be any order you want.
-
-        an example would look like this:
-            params = {
-                "style": "deposit",
-                "markers": ["P", "*"],
-                "style_order": sorted(plot_df["deposit"].unique(), reverse=True),
-                "style_title": "Deposit",
-            }
+        bold : bool, default True
+            Whether to make loadings labels bold.
 
     Returns
     -----
-    figt
-        matplotlib.pyplot figure
+    fig
+        Matplotlib.pyplot figure object
 
-    axt
-        matplotlib.pyplot axes
+    ax
+        Matplotlib.pyplot axis object
     """
-    print(
-        "This is an experimental version of pca_plot() if it breaks, let me know and use pca_plot_old() instead"
-    )
-
-    if btmldglbls is None:
-        btmldglbls = ["NPR<0.2", "0.2<NPR<3", "NPR>3"]
-
-    if pca_df is None:  # automatically set loading_lines to False if pca_df is None
-        loading_lines = False
-
-    # call line plot function
-    if loading_lines:
-        figt, axt = loadings_line_plot(
-            pca_df=pca_df,
-            pca1=pca1,
-            pca2=pca2,
-            alpha_lns=alpha_lns,
-            metals=metals,
-            bold=bold,
-        )
-    else:
-        figt, axt = plt.subplots(figsize=(10, 10))
-
-    # make copy of df to avoid altering original
-    temp = df.copy()
-
-    temp.dropna(subset=[lith], inplace=True)  # drop NaNs in lith column
-
-    temp.reset_index(inplace=True, drop=True)
-
-    if lith_order_in is None:
-        lith_order_in = Lith_order
-
-    unique_lith_in = df[lith].unique()
-
-    lith_present = [l for l in lith_order_in if l in unique_lith_in]
-
-    if sorted(unique_lith_in) != sorted(
-        lith_present
-    ):  # NaNs break this find a solution
-        warnings.warn(
-            "Lithologies in sample not present in chosen lith order, appending to end"
-        )
-        lith_present = lith_present + [
-            l for l in unique_lith_in if l not in lith_present
-        ]
-
-    # get color range
-    colors = np.linspace(0, 1, len(unique_lith_in))
-
-    # dictionary to map lithologies to unique color spectrum
-    color_dict = dict(zip(lith_present, colors))
-
-    # map lithologies to new 'color' column
-    # apply cmap to turn linspace into rgb color from matplotlib cm
-    # if cmap is a dictionary, use it to map colors, else use cmap as is
-    if isinstance(cmapin, dict):
-        print("using cmap as dictionary")
-        temp["color"] = temp[lith].replace(cmapin)
-    # else if cmap is a pyplot colormap, use it to map colors
-    elif isinstance(cmapin, cm.colors.Colormap):
-        temp["color"] = temp[lith].replace(color_dict).apply(cmapin)
-        cmapin = cm.colors.ListedColormap([cmapin(i) for i in colors])
-        # make cmapin a dictionary for use in legend
-        cmapin = {l: cmapin(i) for i, l in enumerate(lith_present)}
-    # else print warning and use turbo
-    else:
-        warnings.warn("Colormap not recognized, using matplotlib.cm.turbo as default")
-        temp["color"] = temp[lith].replace(color_dict).apply(cm.turbo)
-        # make cmapin a dictionary for use in legend
-        cmapin = {l: cm.turbo(i) for i, l in enumerate(lith_present)}
-
-    # make lithology a categorical column
-    # have to do second due to multi-index problems
-    # when using 'replace' function on lith column
-    temp[lith] = Categorical(temp[lith], categories=lith_present, ordered=True)
-    # sort on lith column
-    temp.sort_values(by=lith, inplace=True)
-
-    temp.reset_index(inplace=True, drop=True)
-
-    if isinstance(alpha_sct, str):
-        alpha_sct = temp[alpha_sct]
-
-    if edgecolor:
-        edg = "k"
-    else:
-        edg = None
-
-    if isinstance(npr_size, str):
-        npr_size = temp[npr_size]
-
-    params = {
-        "alpha": alpha_sct,
-        "s": npr_size,
-        "edgecolor": edg,
-        "c": temp["color"],
-        "facecolors": "none",
+    # set default values for kwargs
+    kwargs_dict = {
+        "x": "PC1",
+        "y": "PC2",
+        "style_order": None,
+        "sizes": (200, 50),
+        "size_order": None,
+        "alpha": 0.8,
+        "bold": True,
     }
-    for key, value in kwargs.items():
-        params[key] = value
+    # update kwargs_dict with kwargs
+    kwargs_dict.update(kwargs)
+    # unpack alpha
+    if isinstance(kwargs_dict["alpha"], str):
+        _alpha = plot_df[kwargs_dict["alpha"]]
+    else:
+        _alpha = kwargs_dict["alpha"]
+    if not (0 <= _alpha <= 1):
+        raise ValueError("Alpha must be between 0 and 1.")
 
+    if not (kwargs_dict["x"] in plot_df.columns) or not (
+        kwargs_dict["y"] in plot_df.columns
+    ):
+        raise ValueError(
+            f"Columns {kwargs_dict['x']} and {kwargs_dict['y']} must be in plot_df.\nConsider using 'x' and 'y' kwargs to set columns or rename columns in dataframe."
+        )
+
+    # plot loadings
+    fig, ax = loadings_line_plot(
+        ldg_mat,
+        pca1=kwargs_dict["x"],
+        pca2=kwargs_dict["x"],
+        figsz=10,
+        bold=kwargs_dict["bold"],
+    )
+    _ = ax.set_xlabel(f"PC1 ({exp_var[0]:.0%} variance)")
+    _ = ax.set_ylabel(f"PC2 ({exp_var[1]:.0%} variance)")
+
+    # use sns scatterplot to plot data points
     _ = sns.scatterplot(
-        data=temp,
-        x=pca1a,
-        y=pca2a,
-        ax=axt,
-        **params,
+        data=plot_df,
+        x=kwargs_dict["x"],
+        y=kwargs_dict["y"],
+        hue=hue_col,
+        palette=palette_dict,
+        style=style_col,
+        markers=marker_dict,
+        style_order=kwargs_dict["style_order"],
+        size=size_col,
+        sizes=kwargs_dict["sizes"],  # needs to be inverse of size_order
+        size_order=kwargs_dict[
+            "size_order"
+        ],  # first corresponds to sizes[1], second to sizes[0]
+        alpha=_alpha,
+        edgecolor="k",
     )
-
-    # calc plot limits
-    xmin, xmax, ymin, ymax = axis_limits(df[pca1a], df[pca2a])
-
-    # set plot limits to make square
-    axt.set_xlim(xmin, xmax)
-    axt.set_ylim(ymin, ymax)
-
-    if plot_npr:
-        # npr labels
-        npr_labels = btmldglbls
-        # size of npr circles in legend (different from plot because
-        # they are built on different scales)
-        # plot_sizes = sorted(set(npr_size))
-        # legend_sizes = [np.sqrt(s) for s in plot_sizes]
-        # CLOSE BUT NOT QUITE, STILL USING MANUAL SIZES
-        legend_sizes = np.linspace(7, 16, len(btmldglbls))
-        # make legend handles for NPR size legend
-        # number of 'o' markers equal to number of sizes
-        leg_1_handles = [
-            Line2D(
-                [],
-                [],
-                markersize=size,
-                marker="o",
-                color="w",
-                markerfacecolor="grey",
-                label=label,
-            )
-            for size, label in zip(legend_sizes, npr_labels)
-        ]
-        # construct first legend
-        # locate in bottom right
-        first_legend = plt.legend(
-            handles=leg_1_handles,
-            loc="lower left",
-            bbox_to_anchor=(btbbx, btbby),
-            borderaxespad=1.0,
-            frameon=False,
-        )
-
-        # set first legend title
-        first_legend.set_title(bottomledgettl, prop={"size": 15})  # type: ignore
-        # add first legend as artist
-        axt.add_artist(first_legend)
-    else:
-        pass
-    if "style" and "markers" and "style_order" in params.keys():
-        print("making 3rd legend")
-        # build second legend
-        # markers of color associated with
-        # lithologies in the plot
-        leg_3_handles = [
-            Line2D(
-                [],
-                [],
-                markersize=10,
-                marker=b,
-                color="white",
-                label=a,
-                markerfacecolor="black",
-            )
-            for a, b in zip(params["style_order"], params["markers"])
-        ]
-        # construct second legend, pad to avoid cutting off legend 1
-        third_legend = plt.legend(
-            handles=leg_3_handles,
-            bbox_to_anchor=(thrdbbx, thrdbby),
-            loc="lower left",
-            frameon=False,
-        )
-        third_legend.set_title(l3_title, prop={"size": 15})  # type: ignore
-
-        axt.add_artist(third_legend)
-
-    # build second legend
-    # markers of color associated with
-    # lithologies in the plot
-    leg_elem = [
-        Line2D(
-            [],
-            [],
-            markersize=10,
-            marker="o",
-            color="white",
-            label=a,
-            markerfacecolor=cmapin[a],
-            # alpha=alpha_sct, # this works, not sure I like it though
-        )
-        for a in lith_present
-    ]
-    # construct second legend, pad to avoid cutting off legend 1
-    axt.legend(
-        handles=leg_elem,
-        borderaxespad=2.1,
-        bbox_to_anchor=(tpbbx, tpbby),
-        loc="upper left",
-        frameon=False,
+    _pc_x_l, _pc_x_u, _pc_y_l, _pc_y_u = axis_limits(
+        plot_df[kwargs_dict["x"]], plot_df[kwargs_dict["y"]]
     )
-    # set legend 2 title
-    axt.get_legend().set_title(topledgettl, prop={"size": 15})  # type: ignore
-    # set plot title
-    axt.set_title(title, size=20)
-
-    if pca_obj is not None:  # only label if pca_obj given
-        # set x-axis label
-        axt.set_xlabel(
-            f"Principal component {x_axispca} ({round(pca_obj[x_axispca-1]*100,2)}%)",
-            size=15,
-        )
-        # set y-axis label
-        axt.set_ylabel(
-            f"Principal component {y_axispca} ({round(pca_obj[y_axispca-1]*100,2)}%)",
-            size=15,
-        )
-    else:
-        axt.set_xlabel(
-            f"{pca1a}", size=15
-        )  # if pca not given use column names to label axis
-        axt.set_ylabel(f"{pca2a}", size=15)
-    # turn on grid
-    axt.grid()
-
-    return figt, axt
-
-
-# preserve old version of pca_plot
-# until new version is fully tested
-def pca_plot_old(
-    df,
-    pca_df,
-    pca_obj,
-    pca1="PC1",
-    pca2="PC2",
-    metals="metals",
-    lith="lithology_relog",
-    npr_size="npr_size",
-    cmapin=cm.turbo,  # type: ignore
-    pca1a="PC1",
-    pca2a="PC2",
-    alpha_sct=1.0,
-    alpha_lns=0.8,
-    lith_order_in=None,
-    title="PCA Bi-Plot",
-    x_axispca=1,
-    y_axispca=2,
-    plot_npr=True,
-    edgecolor=True,
-    loading_lines=True,
-    tpbbx=0.985,
-    tpbby=1.05,
-    mkrin="o",
-    btbbx=0.985,
-    btbby=0,
-    topledgettl="Lithology",
-    bottomledgettl="NPR",
-    btmldglbls=None,
-    bold=False,
-):
-    """
-    Makes PCA bi-plot with metals loading
-
-    Parameters
-    ----------
-    df  pandas dataframe
-        At minimum has columns for sample lithology, NPR sizes,
-        and 2 principal components.
-
-    pca_df : pandas dataframe | None
-        Contains PCA loadings for metals, structured as follows:
-        rows are metals, columns are PCA loadings and labels
-        to be passed to loadings_line_plot.
-        If loading_lines=False, set 'pca_df=None'.
-
-    pca_obj : array-like, with len>=2
-        The percentage of variance explained by the PCA values being plotted.
-
-    pca1 : str, default 'PCA1', optional
-        Name of column in pca_df with PCA1 values (x-axis)
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
-
-    pca2 : str, default 'PCA2', optional
-        Name of column in pca_df with PCA2 values (y-axis)
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
-
-    metals : st, default 'metals', optional
-        Name of column in pca_df with metal names for labeling,
-        to be passed to loadings_line_plot.
-        If loading_lines=False, this variable will be ignored.
-
-    lith : str, default 'Lithology'
-        Name of column in 'df' with the lithologies.
-
-    npr_size : str, default 'NPR', optional
-        Name of column in df with NPR size categories,
-        the values in this column will correspond directly to the size of
-        the plotted points, column needs to be numerical.
-        If plot_npr=False this variable is ignored.
-
-    cmapin = matplotlib colormap object, default cm.turbo
-        Colormap to be used for coloring the points by lithology.
-
-    pca1a : str, default 'PCA1'
-        Name of column in df with PCA1 (x-axis).
-
-    pca2a : str, default 'PCA2'
-        Name of column in df with PCA2 (y-axis).
-
-    alpha_sct : float(0-1) or str, default 1
-        If float, alpha value for scatterplot points
-        If str, column in df to use for alpha values, the column
-        must have numerical values (0-1).
-
-    alpha_lns : float(0-1), default 1
-        Alpha value for metal loading lines, passed to loadings_line_plot.
-        If loading_lines=False this variable is ignored.
-
-    lith_order_in : list-like strings, default Lith_order
-        The order in which to list the lithologies in the legend.
-
-    title : str, default 'PCA Bi-Plot'
-        Title to give the plot.
-
-    x_axispca : int, default 1
-        Index+1 location in pca_obj of variance explained for PCA1.
-        Must be less than len(pca_obj).
-
-    y_axispca : int, default 2
-        Index+1 location in pca_obj of variance explained for PCA2.
-        Must be less than len(pca_obj).
-
-    plot_npr : bool, default True
-        Whether to plot NPR sizes
-
-    edgecolor : bool, default True
-        Use edgecolor on markers in plot, if True edgecolor='k'.
-
-    loading_lines : bool, default True
-        Whether to call loadings_line_plot() function.
-        If False set pca_df=None
-
-    tpbbx : float
-        x of bounding box to anchor for main legend
-
-    tpbby : float
-        y of bounding box to anchor for main legend
-
-    mkrin : str
-        matplotlib marker code
-
-    btbbx : float
-        x of bounding box to anchor for NPR legend
-
-    btbby : float
-        y of bounding box to anchor for NPR legend
-
-    topledgettl : str
-        Title for top legend
-
-    bottomledgettl : str
-        Title for bottom legend
-
-    btmldglbls : list-like strings
-        Labels for bottom legend
-
-    Returns
-    -----
-    figt
-        matplotlib.pyplot figure
-
-    axt
-        matplotlib.pyplot axes
-    """
-
-    # set mutable defaults
-    if btmldglbls is None:
-        btmldglbls = ["NPR<0.2", "0.2<NPR<2 ", "2<NPR<3", "NPR>3"]
-
-    # call line plot function
-    if loading_lines:
-        figt, axt = loadings_line_plot(
-            pca_df=pca_df,
-            pca1=pca1,
-            pca2=pca2,
-            alpha_lns=alpha_lns,
-            metals=metals,
-            bold=bold,
-        )
-    else:
-        figt, axt = plt.subplots(figsize=(10, 10))
-
-    if lith_order_in is None:
-        print("none")
-        lith_order_in = Lith_order
-        # get color range
-        unique_lith_in = df[lith].unique()
-
-        colors = np.linspace(0, 1, len(unique_lith_in))
-
-        lith_present = [l for l in lith_order_in if l in unique_lith_in]
-        # dictionary to map lithologies to unique color spectrum
-        color_dict = dict(zip(lith_present, colors))
-    else:
-        lith_present = lith_order_in
-        unique_lith_in = df[lith].unique()
-        colors = np.linspace(0, 1, len(lith_present))
-        color_dict = dict(zip(lith_present, colors))
-        print(color_dict)
-
-    # if sorted(unique_lith_in) != sorted(lith_present):
-    #     warnings.warn(
-    #         "Lithologies in sample not present in chosen lith order, appending to end"
-    #     )
-    #     lith_present = lith_present + [
-    #         l for l in unique_lith_in if l not in lith_present
-    #     ]
-
-    # make copy of df to avoid altering original
-    temp = df.copy()
-
-    # map lithologies to new 'color' column
-    # apply cmap to turn linspace into rgb color from matplotlib cm
-    temp["color"] = temp[lith].replace(color_dict).apply(cmapin)
-
-    # make lithology a categorical column
-    # have to do second due to multi-index problems
-    # when using 'replace' function on lith column
-    temp[lith] = Categorical(temp[lith], categories=lith_present, ordered=True)
-    # sort on lith column
-    temp.sort_values(by=lith, inplace=True)
-
-    temp.reset_index(inplace=True, drop=True)
-
-    if isinstance(alpha_sct, str):
-        alpha_sct = temp[alpha_sct]
-
-    if edgecolor:
-        edg = "k"
-    else:
-        edg = None
-
-    # plot
-    temp.plot(
-        kind="scatter",
-        x=pca1a,
-        y=pca2a,
-        c="color",
-        facecolors="none",
-        edgecolors=edg,
-        marker=mkrin,
-        ax=axt,
-        alpha=alpha_sct,
-        s=npr_size,
-        legend=False,
+    _ldg_x_l, _ldg_x_u, _ldg_y_l, _ldg_y_u = axis_limits(
+        ldg_mat[kwargs_dict["x"]], ldg_mat[kwargs_dict["y"]]
     )
-
-    # calc plot limits
-    xmin, xmax, ymin, ymax = axis_limits(df[pca1a], df[pca2a])
-
-    # set plot limits to make square
-    axt.set_xlim(xmin, xmax)
-    axt.set_ylim(ymin, ymax)
-
-    if plot_npr:
-        # npr labels, these are hard coded but could be changed if we want
-        npr_labels = btmldglbls
-        # size of npr circles in legend (different from plot because
-        # they are built on different scales)
-        npr_leg_size = np.linspace(5, 15, len(btmldglbls))
-
-        # make legend handles for NPR size legend
-        # number of 'o' markers equal to number of sizes
-        leg_1_handles = [
-            Line2D(
-                [],
-                [],
-                markersize=a,
-                marker="o",
-                color="w",
-                markerfacecolor="grey",
-                label=b,
-            )
-            for a, b in zip(npr_leg_size, npr_labels)
-        ]
-        # construct first legend
-        # locate in bottom right
-        first_legend = plt.legend(
-            handles=leg_1_handles,
-            loc="lower left",
-            bbox_to_anchor=(btbbx, btbby),
-            borderaxespad=1.0,
-            frameon=False,
-        )
-        # set first legend title
-        first_legend.set_title(bottomledgettl, prop={"size": 15})  # type: ignore
-        # add first legend as artist
-        axt.add_artist(first_legend)
-    else:
-        pass
-
-    # build second legend
-    # markers of color associated with
-    # lithologies in the plot
-    leg_elem = [
-        Line2D(
-            [], [], markersize=10, marker="o", color="white", label=a, markerfacecolor=b
-        )
-        for a, b in zip(lith_present, cmapin(colors))
-    ]
-    # construct second legend, pad to avoid cutting off legend 1
-    axt.legend(
-        handles=leg_elem,
-        borderaxespad=2.1,
-        bbox_to_anchor=(tpbbx, tpbby),
-        loc="upper left",
-        frameon=False,
+    _plot_lims = (
+        min(_pc_x_l, _ldg_x_l),
+        max(_pc_x_u, _ldg_x_u),
+        min(_pc_y_l, _ldg_y_l),
+        max(_pc_y_u, _ldg_y_u),
     )
-    # set legend 2 title
-    axt.get_legend().set_title(topledgettl, prop={"size": 15})  # type: ignore
-    # set plot title
-    axt.set_title(title, size=20)
-
-    # set x-axis label
-    axt.set_xlabel(
-        f"Principal component {x_axispca} ({round(pca_obj[x_axispca-1]*100,2)}%)",
-        size=15,
-    )
-    # set y-axis label
-    axt.set_ylabel(
-        f"Principal component {y_axispca} ({round(pca_obj[y_axispca-1]*100,2)}%)",
-        size=15,
-    )
-    # turn on grid
-    axt.grid()
-
-    return figt, axt
-
-
-# %%
+    _ = ax.set_xlim(_plot_lims[0], _plot_lims[1])
+    _ = ax.set_ylim(_plot_lims[2], _plot_lims[3])
+    return fig, ax
 
 
 # %%
