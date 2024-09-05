@@ -3,7 +3,6 @@
 # get_max_max
 # loadings_line_plot
 # pca_plot
-# pca_plot_old
 # axis_limits
 # color_bars
 # factor_loading_plot
@@ -13,13 +12,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import matplotlib.cm as cm
-from pandas import Categorical, DataFrame
+from pandas import DataFrame
 from sklearn.decomposition import PCA
-from clrutils import Lith_order
 import seaborn as sns
-import warnings
 
 
 # quick test of any null/NaN values in df
@@ -147,11 +142,6 @@ def pca_plot(
     plot_df,
     ldg_mat,
     exp_var,
-    hue_col,
-    style_col,
-    size_col,
-    palette_dict,
-    marker_dict,
     **kwargs,
 ) -> tuple:
     """
@@ -172,25 +162,25 @@ def pca_plot(
     hue_col : str
         Column in 'plot_df' to use for color.
 
-    style_col : str
-        Column in 'plot_df' to use for style.
-
-    size_col : str
-        Column in 'plot_df' to use for size.
-
-    palette_dict : dict
-        Dictionary with color palette for 'hue_col'.
-        Example: {'sandstone': 'orange', 'shale': 'blue'}
-        Must correspond to unique values in 'hue_col'.
-
-    marker_dict : dict
-        Dictionary with markers for 'style_col'.
-        Example: {'quartz': 'P', 'feldspar': 'o'}
-        Must correspond to unique values in 'style_col'.
-
     **kwargs
         Additional keyword arguments to pass to the function.
         Options include:
+        style_col : str
+            Column in 'plot_df' to use for style.
+
+        size_col : str
+            Column in 'plot_df' to use for size.
+
+        palette_dict : dict
+            Dictionary with color palette for 'hue_col'.
+            Example: {'sandstone': 'orange', 'shale': 'blue'}
+            Must correspond to unique values in 'hue_col'.
+
+        marker_dict : dict
+            Dictionary with markers for 'style_col'.
+            Example: {'quartz': 'P', 'feldspar': 'o'}
+            Must correspond to unique values in 'style_col'.
+
         x : str, default 'PC1'
             Column in 'plot_df' to use for x-axis.
             Must match column in 'ldg_mat'.
@@ -224,6 +214,11 @@ def pca_plot(
     """
     # set default values for kwargs
     kwargs_dict = {
+        "hue_col": None,
+        "style_col": None,
+        "size_col": None,
+        "palette_dict": None,
+        "marker_dict": None,
         "x": "PC1",
         "y": "PC2",
         "style_order": None,
@@ -239,8 +234,6 @@ def pca_plot(
         _alpha = plot_df[kwargs_dict["alpha"]]
     else:
         _alpha = kwargs_dict["alpha"]
-    if not (0 <= _alpha <= 1):
-        raise ValueError("Alpha must be between 0 and 1.")
 
     if not (kwargs_dict["x"] in plot_df.columns) or not (
         kwargs_dict["y"] in plot_df.columns
@@ -253,7 +246,7 @@ def pca_plot(
     fig, ax = loadings_line_plot(
         ldg_mat,
         pca1=kwargs_dict["x"],
-        pca2=kwargs_dict["x"],
+        pca2=kwargs_dict["y"],
         figsz=10,
         bold=kwargs_dict["bold"],
     )
@@ -265,18 +258,19 @@ def pca_plot(
         data=plot_df,
         x=kwargs_dict["x"],
         y=kwargs_dict["y"],
-        hue=hue_col,
-        palette=palette_dict,
-        style=style_col,
-        markers=marker_dict,
+        hue=kwargs_dict["hue_col"],
+        palette=kwargs_dict["palette_dict"],
+        style=kwargs_dict["style_col"],
+        markers=kwargs_dict["marker_dict"],
         style_order=kwargs_dict["style_order"],
-        size=size_col,
+        size=kwargs_dict["size_col"],
         sizes=kwargs_dict["sizes"],  # needs to be inverse of size_order
         size_order=kwargs_dict[
             "size_order"
         ],  # first corresponds to sizes[1], second to sizes[0]
         alpha=_alpha,
         edgecolor="k",
+        ax=ax,
     )
     _pc_x_l, _pc_x_u, _pc_y_l, _pc_y_u = axis_limits(
         plot_df[kwargs_dict["x"]], plot_df[kwargs_dict["y"]]
@@ -290,8 +284,8 @@ def pca_plot(
         min(_pc_y_l, _ldg_y_l),
         max(_pc_y_u, _ldg_y_u),
     )
-    _ = ax.set_xlim(_plot_lims[0], _plot_lims[1])
-    _ = ax.set_ylim(_plot_lims[2], _plot_lims[3])
+    _ = ax.set_xlim(_plot_lims[0] * 1.1, _plot_lims[1] * 1.1)
+    _ = ax.set_ylim(_plot_lims[2] * 1.1, _plot_lims[3] * 1.1)
     return fig, ax
 
 
