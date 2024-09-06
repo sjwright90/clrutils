@@ -103,6 +103,8 @@ def loadings_line_plot(
     ax
         Matplotlib.pyplot axis object
     """
+    if not (pca1 in ldg_mat.columns) or not (pca2 in ldg_mat.columns):
+        raise ValueError(f"Columns {pca1} and {pca2} must be in ldg_mat.")
 
     # make subplot
     fig, ax = plt.subplots(figsize=(figsz, figsz))
@@ -118,9 +120,6 @@ def loadings_line_plot(
     wgth = "normal"
     if bold:
         wgth = "bold"
-
-    if not (pca1 in ldg_mat.columns) or not (pca2 in ldg_mat.columns):
-        raise ValueError(f"Columns {pca1} and {pca2} must be in ldg_mat.")
 
     # set element labels
     for loc, lab in zip(ldg_mat[[pca1, pca2]].values, ldg_mat[labels]):
@@ -142,6 +141,10 @@ def pca_plot(
     plot_df,
     ldg_mat,
     exp_var,
+    x,
+    y,
+    alpha=1,
+    bold=True,
     **kwargs,
 ) -> tuple:
     """
@@ -159,50 +162,19 @@ def pca_plot(
     exp_var : list
         List of floats with explained variance for PC1 and PC2.
 
-    hue_col : str
-        Column in 'plot_df' to use for color.
+    x : str
+        Column in 'plot_df' to use for x-axis.
+        Must match column in 'ldg_mat'.
+
+    y : str
+        Column in 'plot_df' to use for y-axis.
+        Must match column in 'ldg_mat'.
 
     **kwargs
-        Additional keyword arguments to pass to the function.
-        Options include:
-        style_col : str
-            Column in 'plot_df' to use for style.
-
-        size_col : str
-            Column in 'plot_df' to use for size.
-
-        palette_dict : dict
-            Dictionary with color palette for 'hue_col'.
-            Example: {'sandstone': 'orange', 'shale': 'blue'}
-            Must correspond to unique values in 'hue_col'.
-
-        marker_dict : dict
-            Dictionary with markers for 'style_col'.
-            Example: {'quartz': 'P', 'feldspar': 'o'}
-            Must correspond to unique values in 'style_col'.
-
-        x : str, default 'PC1'
-            Column in 'plot_df' to use for x-axis.
-            Must match column in 'ldg_mat'.
-
-        y : str, default 'PC2'
-            Column in 'plot_df' to use for y-axis.
-            Must match column in 'ldg_mat'.
-
-        style_order : list, default None
-            Order of style categories.
-
-        sizes : tuple, default (200, 50)
-            Tuple with sizes for 'size_order'.
-
-        size_order : list, default None
-            Order of size categories.
-
-        alpha : float(0-1) or string, default 0.8
-            Alpha value for data points. If string must be a column in 'plot_df' with values between 0 and 1.
-
-        bold : bool, default True
-            Whether to make loadings labels bold.
+        Additional keyword arguments to pass to seaborn.scatterplot.
+        Use documentation for seaborn.scatterplot to see available options.
+        Common options include 'hue', 'size', 'style', 'palette', 'markers',
+        'hue_order', 'style_order', 'sizes', 'size_order'.
 
     Returns
     -----
@@ -213,71 +185,48 @@ def pca_plot(
         Matplotlib.pyplot axis object
     """
     # set default values for kwargs
-    kwargs_dict = {
-        "hue_col": None,
-        "style_col": None,
-        "size_col": None,
-        "palette_dict": None,
-        "marker_dict": None,
-        "x": "PC1",
-        "y": "PC2",
-        "style_order": None,
-        "sizes": (200, 50),
-        "size_order": None,
-        "alpha": 0.8,
-        "bold": True,
-    }
-    # update kwargs_dict with kwargs
-    kwargs_dict.update(kwargs)
     # unpack alpha
-    if isinstance(kwargs_dict["alpha"], str):
-        _alpha = plot_df[kwargs_dict["alpha"]]
+    if isinstance(alpha, str):
+        _alpha = plot_df[alpha]
     else:
-        _alpha = kwargs_dict["alpha"]
+        _alpha = alpha
 
-    if not (kwargs_dict["x"] in plot_df.columns) or not (
-        kwargs_dict["y"] in plot_df.columns
-    ):
-        raise ValueError(
-            f"Columns {kwargs_dict['x']} and {kwargs_dict['y']} must be in plot_df.\nConsider using 'x' and 'y' kwargs to set columns or rename columns in dataframe."
-        )
-
+    if not x in ldg_mat.columns and not y in ldg_mat.columns:
+        raise ValueError(f"{x} and {y} must be columns in 'ldg_mat'.")
+    if not x in plot_df.columns and not y in plot_df.columns:
+        raise ValueError(f"{x} and {y} must be columns in 'plot_df'.")
     # plot loadings
     fig, ax = loadings_line_plot(
         ldg_mat,
-        pca1=kwargs_dict["x"],
-        pca2=kwargs_dict["y"],
+        pca1=x,
+        pca2=y,
         figsz=10,
-        bold=kwargs_dict["bold"],
+        bold=bold,
     )
     _ = ax.set_xlabel(f"PC1 ({exp_var[0]:.0%} variance)")
     _ = ax.set_ylabel(f"PC2 ({exp_var[1]:.0%} variance)")
 
+    # Clean kwargs
+    _kwargs = {}
+    _valid_kwargs = sns.scatterplot.__code__.co_varnames
+    for key, value in kwargs.items():
+        if not key in _valid_kwargs:
+            # drop from kwargs and notify user
+            print(f"'{key}' not a valid argument for sns.scatterplot.\nDropping {key}.")
+        else:
+            _kwargs[key] = value
+
     # use sns scatterplot to plot data points
     _ = sns.scatterplot(
         data=plot_df,
-        x=kwargs_dict["x"],
-        y=kwargs_dict["y"],
-        hue=kwargs_dict["hue_col"],
-        palette=kwargs_dict["palette_dict"],
-        style=kwargs_dict["style_col"],
-        markers=kwargs_dict["marker_dict"],
-        style_order=kwargs_dict["style_order"],
-        size=kwargs_dict["size_col"],
-        sizes=kwargs_dict["sizes"],  # needs to be inverse of size_order
-        size_order=kwargs_dict[
-            "size_order"
-        ],  # first corresponds to sizes[1], second to sizes[0]
+        x=x,
+        y=y,
         alpha=_alpha,
-        edgecolor="k",
         ax=ax,
+        **_kwargs,
     )
-    _pc_x_l, _pc_x_u, _pc_y_l, _pc_y_u = axis_limits(
-        plot_df[kwargs_dict["x"]], plot_df[kwargs_dict["y"]]
-    )
-    _ldg_x_l, _ldg_x_u, _ldg_y_l, _ldg_y_u = axis_limits(
-        ldg_mat[kwargs_dict["x"]], ldg_mat[kwargs_dict["y"]]
-    )
+    _pc_x_l, _pc_x_u, _pc_y_l, _pc_y_u = axis_limits(plot_df[x], plot_df[y])
+    _ldg_x_l, _ldg_x_u, _ldg_y_l, _ldg_y_u = axis_limits(ldg_mat[x], ldg_mat[y])
     _plot_lims = (
         min(_pc_x_l, _ldg_x_l),
         max(_pc_x_u, _ldg_x_u),
