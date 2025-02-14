@@ -12,8 +12,54 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from clrutils.pca_plots import pca_loading_matrix
+
+from sklearn.decomposition import PCA
+
 # %%
 
+
+def pc_scaler(series):
+    """
+    Min-max scaler
+
+    Parameters
+    ----------
+    trnf_data : pandas series, pandas df, or numpy array
+        Values to be scaled.
+
+    Returns
+    -----
+    series
+        All items in series with a min-max scaler applied.
+    """
+    return series / (series.max() - series.min())
+
+
+# %%
+
+df_make_pca = pd.DataFrame(
+    {
+        "a": np.random.random(10),
+        "b": np.random.random(10),
+        "c": np.random.random(10),
+        "d": np.random.random(10),
+    }
+)
+
+pca_by_hand = PCA(n_components=4)
+
+pca_out = pca_by_hand.fit_transform(df_make_pca.values)
+# pca_by_hand.fit(df_make_pca.values)
+# pca_out = pca_by_hand.transform(df_make_pca.values)
+
+
+# %%
+print(pca_out.shape)
+# %%
+a, b, c = pca_loading_matrix(df_make_pca, n_components=4)
+
+# %%
 test_df = pd.DataFrame(
     {
         "PC1": np.random.randn(100),

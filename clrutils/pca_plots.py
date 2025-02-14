@@ -68,7 +68,7 @@ def loadings_line_plot(
     figsz=10,
     t_sz=11,
     color="y",
-    bold=False,
+    bold=True,
 ) -> tuple:
     """
     Makes plot of labels loadings for principal components.
@@ -144,7 +144,6 @@ def pca_plot(
     x,
     y,
     alpha=1,
-    bold=True,
     **kwargs,
 ) -> tuple:
     """
@@ -195,20 +194,31 @@ def pca_plot(
         raise ValueError(f"{x} and {y} must be columns in 'ldg_mat'.")
     if not x in plot_df.columns and not y in plot_df.columns:
         raise ValueError(f"{x} and {y} must be columns in 'plot_df'.")
+
+    _loading_lines_kwargs = {}
+    _valid_loading_lines_kwargs = [
+        k
+        for k in loadings_line_plot.__code__.co_varnames
+        if not k in ["ldg_mat", "pca1", "pca2"]
+    ]
+    for key, value in kwargs.items():
+        if key in _valid_loading_lines_kwargs:
+            _loading_lines_kwargs[key] = value
+
+    kwargs = {k: v for k, v in kwargs.items() if not k in _valid_loading_lines_kwargs}
     # plot loadings
     fig, ax = loadings_line_plot(
         ldg_mat,
         pca1=x,
         pca2=y,
-        figsz=10,
-        bold=bold,
+        **_loading_lines_kwargs,
     )
     _ = ax.set_xlabel(f"PC1 ({exp_var[0]:.0%} variance)")
     _ = ax.set_ylabel(f"PC2 ({exp_var[1]:.0%} variance)")
 
     # Clean kwargs
     _kwargs = {}
-    _valid_kwargs = sns.scatterplot.__code__.co_varnames
+    _valid_kwargs = sns.scatterplot.__code__.co_varnames + tuple("s")
     for key, value in kwargs.items():
         if not key in _valid_kwargs:
             # drop from kwargs and notify user
@@ -518,7 +528,7 @@ def pca_loading_matrix(df, labels_list=None, exp_var_adj=False, n_components=6):
     if labels_list is None:
         labels_list = df.columns
 
-    # build PCA
+    # build PCA (from sklearn.decomposition)
     temp_pca = PCA(n_components=n_components)
 
     # transform
