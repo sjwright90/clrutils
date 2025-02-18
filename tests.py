@@ -4,7 +4,7 @@ from pathlib import Path
 from clrutils.pca_plots import loadings_line_plot, axis_limits
 import matplotlib.cm as cm
 from importlib import reload
-from clrutils.pca_preprop import npr_to_bins
+from clrutils.pca_preprop import npr_to_bins, clr_trans_scale, CLR
 import string
 import numpy as np
 import matplotlib as mpl
@@ -46,13 +46,12 @@ df_make_pca = pd.DataFrame(
         "d": np.random.random(10),
     }
 )
-
-pca_by_hand = PCA(n_components=4)
-
-pca_out = pca_by_hand.fit_transform(df_make_pca.values)
-# pca_by_hand.fit(df_make_pca.values)
-# pca_out = pca_by_hand.transform(df_make_pca.values)
-
+idx_drop = np.random.choice(df_make_pca.index, 5, replace=False)
+df_make_pca.drop(index=idx_drop, inplace=True)
+df_nes, df_clr = clr_trans_scale(df_make_pca, subset_start="b", scale=False)
+# %%
+temp_out = CLR(df_make_pca.values)
+df_new = pd.DataFrame(temp_out, columns=df_make_pca.columns, index=df_make_pca.index)
 
 # %%
 print(pca_out.shape)

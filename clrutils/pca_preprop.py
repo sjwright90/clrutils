@@ -67,7 +67,7 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
         else:
             temp = df.loc[:, subset_start:].copy().reset_index(drop=True)
     else:
-        temp = df.copy()
+        temp = df.copy().reset_index(drop=True)
     if df_anynull(temp):
         print("Null values in dataframe, CLR will not work\n")
         raise ValueError
@@ -88,6 +88,7 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
             raise
     else:
         temp_sc = DataFrame(temp_clr, columns=temp.columns, index=temp_idx)
+        print(temp_sc)
 
     if subset_start is not None:
         assert df.index.equals(
