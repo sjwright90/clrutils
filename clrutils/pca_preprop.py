@@ -42,8 +42,6 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
     Parameters
     ----------
     df : pandas dataframe, or array-like
-        Contains data stored in Series. If data is a dict, argument order is
-        maintained.
 
     subset_start : str, default None, optional
         Column name of start column to sample for CLR, columns to be sampled
@@ -65,9 +63,9 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
 
     if subset_start is not None:
         if subset_end is not None:
-            temp = df.loc[:, subset_start:subset_end].copy()
+            temp = df.loc[:, subset_start:subset_end].copy().reset_index(drop=True)
         else:
-            temp = df.loc[:, subset_start:].copy()
+            temp = df.loc[:, subset_start:].copy().reset_index(drop=True)
     else:
         temp = df.copy()
     if df_anynull(temp):
@@ -78,7 +76,9 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
     if scale:
         try:
             temp_sc = DataFrame(
-                StandardScaler().fit_transform(temp_clr), columns=temp.columns
+                StandardScaler().fit_transform(temp_clr),
+                columns=temp.columns,
+                index=temp.index,
             )
         except Exception as e:
             print(
@@ -87,8 +87,8 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
             print(e)
             raise
     else:
-        temp_sc = DataFrame(temp_clr, columns=temp.columns)
-    temp_sc.index = temp_idx  # restore index
+        temp_sc = DataFrame(temp_clr, columns=temp.columns, index=temp_idx)
+
     if subset_start is not None:
         assert df.index.equals(
             temp_sc.index
