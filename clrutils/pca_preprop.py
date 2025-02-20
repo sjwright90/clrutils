@@ -88,7 +88,6 @@ def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
             raise
     else:
         temp_sc = DataFrame(temp_clr, columns=temp.columns, index=temp_idx)
-        print(temp_sc)
 
     if subset_start is not None:
         assert df.index.equals(
