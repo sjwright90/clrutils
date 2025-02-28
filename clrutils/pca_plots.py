@@ -218,7 +218,11 @@ def pca_plot(
 
     # Clean kwargs
     _kwargs = {}
-    _valid_kwargs = sns.scatterplot.__code__.co_varnames + tuple("s")
+    _valid_kwargs = set(
+        sns.scatterplot.__code__.co_varnames
+        + plt.scatter.__code__.co_varnames
+        + ("edgecolor", "s")
+    )
     for key, value in kwargs.items():
         if not key in _valid_kwargs:
             # drop from kwargs and notify user
