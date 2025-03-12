@@ -159,9 +159,9 @@ def make_df_for_biplot(
         raise ValueError("No columns to extract from full_df")
 
     colnames = [f"{prefix}{x+1}" for x in range(num_comp)]
-    temp = DataFrame(zip(*trnf_data[:, 0:num_comp].T), index=full_df.index).join(
-        full_df[col_list]
-    )
+    temp = DataFrame(
+        trnf_data[:, 0:num_comp], columns=colnames, index=full_df.index
+    ).join(full_df[col_list])
     temp.columns = colnames + col_list
 
     if scale:
