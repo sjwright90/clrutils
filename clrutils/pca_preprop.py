@@ -34,8 +34,9 @@ def CLR(X):
     return Y
 
 
-def clr_trans_scale(df, subset_start=None, subset_end=None, scale=True):
-    # -> DataFrame | tuple[DataFrame, DataFrame]
+def clr_trans_scale(
+    df: DataFrame, subset_start: str = None, subset_end: str = None, scale: bool = True
+) -> DataFrame | tuple[DataFrame, DataFrame]:
     """
     Apply center log ratio transformation and scale results
 
@@ -117,10 +118,15 @@ def pc_scaler(series):
 
 
 def make_df_for_biplot(
-    trnf_data, full_df, col_list=None, num_comp=2, scale=True, prefix="PC"
-):
+    trnf_data: np.ndarray,
+    full_df: DataFrame,
+    col_list: list = None,
+    num_comp: int = 2,
+    scale: bool = True,
+    prefix: str = "PC",
+) -> DataFrame:
     """
-    Extract PCs and relevant columns for bi-plots
+    Extract PCs and relevant columns for bi-plots. Scale the PCs with min-max scaler.
 
     Parameters
     ----------
@@ -150,10 +156,12 @@ def make_df_for_biplot(
     """
 
     if col_list is None:
-        col_list = ["lith", "lab"]
+        raise ValueError("No columns to extract from full_df")
 
     colnames = [f"{prefix}{x+1}" for x in range(num_comp)]
-    temp = DataFrame(zip(*trnf_data[:, 0:num_comp].T)).join(full_df[col_list])
+    temp = DataFrame(zip(*trnf_data[:, 0:num_comp].T), index=full_df.index).join(
+        full_df[col_list]
+    )
     temp.columns = colnames + col_list
 
     if scale:
