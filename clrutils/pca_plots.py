@@ -12,6 +12,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 from pandas import DataFrame
 from sklearn.decomposition import PCA
 import seaborn as sns
@@ -69,6 +70,7 @@ def loadings_line_plot(
     t_sz=11,
     color="y",
     bold=True,
+    outlined=True,
 ) -> tuple:
     """
     Makes plot of labels loadings for principal components.
@@ -123,7 +125,7 @@ def loadings_line_plot(
 
     # set element labels
     for loc, lab in zip(ldg_mat[[pca1, pca2]].values, ldg_mat[labels]):
-        ax.annotate(
+        text = ax.annotate(
             lab,
             xy=loc * 1.1,
             size=t_sz,
@@ -133,7 +135,13 @@ def loadings_line_plot(
             ha="center",
             weight=wgth,
         )
-
+        if outlined:
+            text.set_path_effects(
+                [
+                    path_effects.Stroke(linewidth=2, foreground="white"),
+                    path_effects.Normal(),
+                ]
+            )
     return fig, ax
 
 
@@ -224,11 +232,15 @@ def pca_plot(
         + ("edgecolor", "s")
     )
     for key, value in kwargs.items():
-        if not key in _valid_kwargs:
-            # drop from kwargs and notify user
-            print(f"'{key}' not a valid argument for sns.scatterplot.\nDropping {key}.")
-        else:
-            _kwargs[key] = value
+        # I don't want to manage all the possible kwargs for scatterplot
+        # so I'll just pass them all through
+        _kwargs[key] = value
+        # if not key in _valid_kwargs:
+        #     # drop from kwargs and notify user
+        #     print(f"'{key}' not a valid argument for sns.scatterplot.\nMight break.")
+        #     _kwargs[key] = value
+        # else:
+        #     _kwargs[key] = value
 
     # use sns scatterplot to plot data points
     _ = sns.scatterplot(

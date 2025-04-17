@@ -57,14 +57,15 @@ df_new = pd.DataFrame(temp_out, columns=df_make_pca.columns, index=df_make_pca.i
 a, b, c = pca_loading_matrix(df_make_pca, n_components=4)
 
 # %%
+n_obs = 1000
 test_df = pd.DataFrame(
     {
-        "PC1": np.random.randn(100),
-        "PC2": np.random.randn(100),
-        "hue_col": np.random.choice(["sandstone", "shale", "granite"], 100),
-        "style_col": np.random.choice(["quartz", "feldspar", "mica"], 100),
-        "size_col": np.random.choice(["small", "medium", "large"], 100),
-        "alpha_col": np.random.rand(100),
+        "PC1": np.random.randn(n_obs),
+        "PC2": np.random.randn(n_obs),
+        "hue_col": np.random.choice(["sandstone", "shale", "granite"], n_obs),
+        "style_col": np.random.choice(["quartz", "feldspar", "mica"], n_obs),
+        "size_col": np.random.choice(["small", "medium", "large"], n_obs),
+        "alpha_col": np.random.rand(n_obs),
     }
 )
 test_ldg_mat = pd.DataFrame(
@@ -80,7 +81,11 @@ palette_dict = {"sandstone": "orange", "shale": "blue", "granite": "green"}
 marker_dict = {"quartz": "P", "feldspar": "o", "mica": "s"}
 sizes = (300, 50)
 size_order = ["small", "medium", "large"]
-test_df["size_col"] = ["small"] * 80 + ["medium"] * 10 + ["large"] * 10
+test_df["size_col"] = (
+    ["small"] * int(0.8 * n_obs)
+    + ["medium"] * int(0.1 * n_obs)
+    + ["large"] * int(0.1 * n_obs)
+)
 style_order = ["quartz", "feldspar", "mica"]
 np.random.shuffle(style_order)
 hue_order = ["sandstone", "shale", "granite"]
@@ -93,11 +98,9 @@ fig, ax = pca_plot(
     exp_var=[0.5, 0.3],
     x="PC1",
     y="PC2",
-    s=1000,
+    s=100,
     edgecolor="black",
 )
-for art in ax.collections:
-    art.set_edgecolor("black")
 # %%
 sns.scatterplot(
     test_df,

@@ -9,6 +9,7 @@ from pandas import DataFrame, cut
 from sklearn.preprocessing import StandardScaler
 from clrutils.submods.helperfncs import df_anynull
 import numpy as np
+from typing import Tuple
 
 
 def CLR(X):
@@ -36,7 +37,7 @@ def CLR(X):
 
 def clr_trans_scale(
     df: DataFrame, subset_start: str = None, subset_end: str = None, scale: bool = True
-) -> DataFrame | tuple[DataFrame, DataFrame]:
+):  # for some reason some versions of python are not happy with the return type hinting
     """
     Apply center log ratio transformation and scale results
 
