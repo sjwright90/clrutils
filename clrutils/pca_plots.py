@@ -221,8 +221,8 @@ def pca_plot(
         pca2=y,
         **_loading_lines_kwargs,
     )
-    _ = ax.set_xlabel(f"PC1 ({exp_var[0]:.0%} variance)")
-    _ = ax.set_ylabel(f"PC2 ({exp_var[1]:.0%} variance)")
+    _ = ax.set_xlabel(f"{x} ({exp_var[0]:.0%} variance)")
+    _ = ax.set_ylabel(f"{y} ({exp_var[1]:.0%} variance)")
 
     # Clean kwargs
     _kwargs = {}
