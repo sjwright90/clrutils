@@ -261,6 +261,15 @@ def pca_plot(
     )
     _ = ax.set_xlim(_plot_lims[0] * 1.1, _plot_lims[1] * 1.1)
     _ = ax.set_ylim(_plot_lims[2] * 1.1, _plot_lims[3] * 1.1)
+
+    # turn on grid
+    _ = ax.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.7)
+    # move legend outside of plot
+    if ax.get_legend() is not None:
+        _ = ax.legend(
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+        )
     return fig, ax
 
 
