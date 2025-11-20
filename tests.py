@@ -62,6 +62,7 @@ test_df = pd.DataFrame(
     {
         "PC1": np.random.randn(n_obs),
         "PC2": np.random.randn(n_obs),
+        "PC3": np.random.randn(n_obs),
         "hue_col": np.random.choice(["sandstone", "shale", "granite"], n_obs),
         "style_col": np.random.choice(["quartz", "feldspar", "mica"], n_obs),
         "size_col": np.random.choice(["small", "medium", "large"], n_obs),
@@ -72,6 +73,7 @@ test_ldg_mat = pd.DataFrame(
     {
         "PC1": np.random.randn(10),
         "PC2": np.random.randn(10),
+        "PC3": np.random.randn(10),
         "metals": list(string.ascii_uppercase[:10]),
     }
 )
@@ -91,8 +93,14 @@ np.random.shuffle(style_order)
 hue_order = ["sandstone", "shale", "granite"]
 alpha = "alpha_col"
 bold = True
-
-fig, ax = pca_plot(
+# %%
+fig, ax = plt.subplots(figsize=(10, 10), ncols=2)
+ax = ax.ravel()
+# loadings_line_plot(
+#     test_ldg_mat,
+#     ax=ax[0],
+# )
+_, _ = pca_plot(
     plot_df=test_df,
     ldg_mat=test_ldg_mat,
     exp_var=[0.5, 0.3],
@@ -100,6 +108,17 @@ fig, ax = pca_plot(
     y="PC2",
     s=100,
     edgecolor="black",
+    ax=ax[1],
+)
+_, _ = pca_plot(
+    plot_df=test_df,
+    ldg_mat=test_ldg_mat,
+    exp_var=[0.5, 0.3],
+    x="PC1",
+    y="PC3",
+    s=100,
+    edgecolor="black",
+    ax=ax[0],
 )
 # %%
 sns.scatterplot(

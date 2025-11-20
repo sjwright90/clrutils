@@ -71,6 +71,7 @@ def loadings_line_plot(
     color="y",
     bold=True,
     outlined=True,
+    ax=None,
 ) -> tuple:
     """
     Makes plot of labels loadings for principal components.
@@ -96,6 +97,19 @@ def loadings_line_plot(
     figsz : int, default 10
 
     t_size : int, default 11
+        Font size for metal labels.
+
+    color : str, default 'y'
+        Color for metal loading lines and labels.
+
+    bold : bool, default True
+        Whether to use bold font for metal labels.
+
+    outlined : bool, default True
+        Whether to outline metal labels for better visibility.
+
+    ax : matplotlib.pyplot axis object, default None
+        Axis to plot on. If None, a new figure and axis are created.
 
     Returns
     -----
@@ -109,7 +123,10 @@ def loadings_line_plot(
         raise ValueError(f"Columns {pca1} and {pca2} must be in ldg_mat.")
 
     # make subplot
-    fig, ax = plt.subplots(figsize=(figsz, figsz))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(figsz, figsz))
+    else:
+        fig = ax.get_figure()
     # plot element loadings
     # matrix of 0s
     zros = np.zeros(len(ldg_mat))
