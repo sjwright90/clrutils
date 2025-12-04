@@ -93,13 +93,22 @@ np.random.shuffle(style_order)
 hue_order = ["sandstone", "shale", "granite"]
 alpha = "alpha_col"
 bold = True
+plotting_kwargs = {
+    "hue": "hue_col",
+    "palette": palette_dict,
+    "hue_order": hue_order,
+    "style": "style_col",
+    "markers": marker_dict,
+    "style_order": style_order,
+    "size": "size_col",
+    "sizes": sizes,
+    "size_order": size_order,
+    "alpha": alpha,
+}
 # %%
 fig, ax = plt.subplots(figsize=(10, 10), ncols=2)
 ax = ax.ravel()
-# loadings_line_plot(
-#     test_ldg_mat,
-#     ax=ax[0],
-# )
+plotting_kwargs.update({"ax": ax[0]})
 _, _ = pca_plot(
     plot_df=test_df,
     ldg_mat=test_ldg_mat,
@@ -108,8 +117,10 @@ _, _ = pca_plot(
     y="PC2",
     s=100,
     edgecolor="black",
-    ax=ax[1],
+    # ax=ax[1],
+    **plotting_kwargs,
 )
+plotting_kwargs.update({"ax": ax[1]})
 _, _ = pca_plot(
     plot_df=test_df,
     ldg_mat=test_ldg_mat,
@@ -118,7 +129,8 @@ _, _ = pca_plot(
     y="PC3",
     s=100,
     edgecolor="black",
-    ax=ax[0],
+    # ax=ax[0],
+    **plotting_kwargs,
 )
 # %%
 sns.scatterplot(
