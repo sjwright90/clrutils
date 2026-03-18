@@ -60,6 +60,7 @@ a, b, c = pca_loading_matrix(df_make_pca, n_components=4)
 n_obs = 1000
 test_df = pd.DataFrame(
     {
+        "loc_id": np.arange(n_obs),
         "PC1": np.random.randn(n_obs),
         "PC2": np.random.randn(n_obs),
         "PC3": np.random.randn(n_obs),
@@ -81,6 +82,7 @@ test_ldg_mat = pd.DataFrame(
 # %%
 palette_dict = {"sandstone": "orange", "shale": "blue", "granite": "green"}
 marker_dict = {"quartz": "P", "feldspar": "o", "mica": "s"}
+marker_dict_ploty = {"quartz": 1, "feldspar": 2, "mica": 3}
 sizes = (300, 50)
 size_order = ["small", "medium", "large"]
 test_df["size_col"] = (
@@ -103,8 +105,61 @@ plotting_kwargs = {
     "size": "size_col",
     "sizes": sizes,
     "size_order": size_order,
-    "alpha": alpha,
+    # "alpha": alpha,
 }
+scatter = sns.scatterplot(
+    data=test_df,
+    x="PC1",
+    y="PC2",
+    **plotting_kwargs,
+)
+# %%
+from clrutils.plotly_plots import annotate_loadings
+import plotly.graph_objects as go
+
+x, y = 0, 1
+x_col, y_col = f"PC{x+1}", f"PC{y+1}"
+figure = go.Figure()
+for hue, df_group in test_df.groupby("hue_col"):
+    figure.add_trace(
+        go.Scatter(
+            x=df_group[x_col],
+            y=df_group[y_col],
+            mode="markers",
+            text=test_df["loc_id"],
+            hoverinfo="text",
+            marker=dict(
+                size=df_group["size_col"].map(
+                    {
+                        "small": 5,
+                        "medium": 15,
+                        "large": 20,
+                    }
+                ),
+                color=df_group["hue_col"].map(palette_dict),
+                symbol=df_group["style_col"].map(marker_dict_ploty),
+                line=dict(width=1, color="black"),
+            ),
+            name=hue,
+        )
+    )
+figure = annotate_loadings(
+    test_ldg_mat,
+    figure,
+    x_col,
+    y_col,
+)
+figure.show()
+# %%
+fig, ax = pca_plot(
+    test_df,
+    test_ldg_mat,
+    exp_var=[0.3, 0.2],
+    x="PC1",
+    y="PC2",
+    legend=False,
+    **plotting_kwargs,
+)
 # %%
 fig, ax = plt.subplots(figsize=(10, 10), ncols=2)
 ax = ax.ravel()
@@ -118,13 +173,14 @@ _, _ = pca_plot(
     s=100,
     edgecolor="black",
     # ax=ax[1],
+    # alpha=[0.5]*len(test_df),
     **plotting_kwargs,
 )
 plotting_kwargs.update({"ax": ax[1]})
 _, _ = pca_plot(
     plot_df=test_df,
-    ldg_mat=test_ldg_mat,
     exp_var=[0.5, 0.3],
+    ldg_mat=test_ldg_mat,
     x="PC1",
     y="PC3",
     s=100,
