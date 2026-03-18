@@ -126,7 +126,7 @@ for hue, df_group in test_df.groupby("hue_col"):
             x=df_group[x_col],
             y=df_group[y_col],
             mode="markers",
-            text=test_df["loc_id"],
+            text=test_df["hue_col"],
             hoverinfo="text",
             marker=dict(
                 size=df_group["size_col"].map(
